@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <title>Register</title>
+    <style>
+        body { margin: 0; background: #0b0b0b; color: #fff; font-family: Arial, "Microsoft YaHei", sans-serif; }
+
+        /* 右上角小表单 */
+        .top-right-form{
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px;
+            background: #121212;
+            border: 1px solid rgba(255,255,255,.15);
+            border-radius: 12px;
+            z-index: 999;
+        }
+
+        .top-right-form input{
+            width: 90px;
+            padding: 6px 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,.25);
+            background: rgba(255,255,255,.05);
+            color: #fff;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .top-right-form button{
+            width: 56px;              /* 两个按钮同宽 */
+            height: 28px;             /* 两个按钮同高 */
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,.25);
+            background: #fff;
+            color: #111;
+            font-weight: 800;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .top-right-form button.secondary{
+            background: transparent;
+            color: #fff;
+        }
+
+        .mini-tip{
+            font-size: 12px;
+            opacity: .85;
+            margin-left: 6px;
+            max-width: 160px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 右上角注册/登录 -->
+<div class="top-right-form">
+    <input id="username" type="text" placeholder="用户名">
+    <input id="password" type="password" placeholder="密码">
+    <button id="registerBtn">注册</button>
+    <button id="loginBtn" class="secondary">登录</button>
+    <span class="mini-tip" id="tip"></span>
+</div>
+
+<script>
+    const API_REGISTER = "/players/register";
+
+    const $ = (id) => document.getElementById(id);
+
+    function setTip(msg, ok=false){
+        const tip = $("tip");
+        tip.textContent = msg || "";
+        tip.style.opacity = msg ? "0.9" : "0";
+        tip.style.color = ok ? "#9efc9e" : "#ffb3b3";
+    }
+
+    $("registerBtn").addEventListener("click", async () => {
+        const userName = $("username").value.trim();
+        const password = $("password").value; // 密码允许空格就别 trim
+
+        if(!userName || !password){
+            setTip("用户名/密码不能为空");
+            return;
+        }
+
+        try{
+            const res = await fetch(API_REGISTER, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userName, password })
+            });
+
+            // 兼容你 Result.success() 的返回结构：这里先粗暴判断 HTTP ok + 再尝试解析
+            const data = await res.json().catch(() => null);
+
+            if(res.ok && data && (data.code === 1 || data.success === true || data.msg === "success")){
+                setTip("注册成功", true);
+            }else{
+                // 尽量从常见字段取错误信息
+                const err = (data && (data.msg || data.message)) || "注册失败";
+                setTip(err);
+            }
+        }catch(e){
+            setTip("网络错误/后端没开");
+        }
+    });
+
+    // 登录按钮：按你要求，不绑定事件
+    // $("loginBtn").addEventListener("click", ()=>{});
+</script>
+
+</body>
+</html>

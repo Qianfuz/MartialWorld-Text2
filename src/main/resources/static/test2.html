@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Game Login/Register</title>
+    <style>
+        body {
+            margin: 0;
+            background: #0b0b0b;
+            color: #fff;
+            font-family: Arial, "Microsoft YaHei", sans-serif;
+        }
+
+        /* 右上角小表单 */
+        .top-right-form {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px;
+            background: #121212;
+            border: 1px solid rgba(255, 255, 255, .15);
+            border-radius: 12px;
+            z-index: 999;
+        }
+
+        .top-right-form input {
+            width: 92px;
+            padding: 6px 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, .25);
+            background: rgba(255, 255, 255, .05);
+            color: #fff;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .top-right-form button {
+            width: 58px;              /* 两个按钮同宽 */
+            height: 28px;             /* 两个按钮同高 */
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, .25);
+            background: #fff;
+            color: #111;
+            font-weight: 800;
+            font-size: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .top-right-form button.secondary {
+            background: transparent;
+            color: #fff;
+        }
+
+        .mini-tip {
+            font-size: 12px;
+            opacity: .9;
+            margin-left: 6px;
+            max-width: 220px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .mini-tip.ok { color: #9efc9e; }
+        .mini-tip.bad { color: #ffb3b3; }
+
+        /* 可选：登录态显示（你想要的话） */
+        .login-state {
+            position: fixed;
+            top: 56px;
+            right: 12px;
+            font-size: 12px;
+            opacity: .85;
+            padding: 8px 10px;
+            background: #121212;
+            border: 1px solid rgba(255,255,255,.15);
+            border-radius: 12px;
+            display: none;
+            z-index: 998;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- 右上角：注册 / 登录 -->
+<div class="top-right-form">
+    <input id="userName" type="text" placeholder="用户名" autocomplete="username">
+    <input id="password" type="password" placeholder="密码" autocomplete="current-password">
+    <button id="registerBtn">注册</button>
+    <button id="loginBtn" class="secondary">登录</button>
+    <span class="mini-tip" id="tip"></span>
+</div>
+
+<div class="login-state" id="loginState"></div>
+
+<script>
+    const API = {
+        register: "/players/register",
+        login: "/players/login",
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function setTip(msg, ok) {
+        const tip = $("tip");
+        tip.textContent = msg || "";
+        tip.classList.remove("ok", "bad");
+        if (msg) tip.classList.add(ok ? "ok" : "bad");
+    }
+
+    function showLoginState(text) {
+        const box = $("loginState");
+        if (!text) {
+            box.style.display = "none";
+            box.textContent = "";
+            return;
+        }
+        box.style.display = "block";
+        box.textContent = text;
+    }
+
+    async function postJson(url, bodyObj) {
+        const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bodyObj)
+        });
+
+        // 有些后端失败也会返回 json，有些会返回空；都兼容一下
+        const data = await res.json().catch(() => null);
+        return { res, data };
+    }
+
+    // 你项目的 Result 结构不确定，我做了一个“兼容判定”
+    function isSuccess(result) {
+        if (!result) return false;
+        // 常见：{code:1,msg:"success",data:...} 或 {success:true,...}
+        if (result.code === 1) return true;
+        if (result.success === true) return true;
+        if (result.msg === "success" || result.message === "success") return true;
+        return false;
+    }
+
+    function getMsg(result, fallback) {
+        if (!result) return fallback;
+        return result.msg || result.message || fallback;
+    }
+
+    // 注册事件
+    $("registerBtn").addEventListener("click", async () => {
+        const userName = $("userName").value.trim();
+        const password = $("password").value;
+
+        if (!userName || !password) {
+            setTip("用户名/密码不能为空", false);
+            return;
+        }
+
+        setTip("注册中…", true);
+
+        try {
+            const { res, data } = await postJson(API.register, { userName, password });
+
+            if (res.ok && isSuccess(data)) {
+                setTip("注册成功", true);
+                // 你想要的话：注册成功后自动登录也行（现在先不自动）
+            } else {
+                setTip(getMsg(data, "注册失败"), false);
+            }
+        } catch (e) {
+            setTip("网络错误/后端没开", false);
+        }
+    });
+
+    // 登录事件
+    $("loginBtn").addEventListener("click", async () => {
+        const userName = $("userName").value.trim();
+        const password = $("password").value;
+
+        if (!userName || !password) {
+            setTip("用户名/密码不能为空", false);
+            return;
+        }
+
+        setTip("登录中…", true);
+
+        try {
+            const { res, data } = await postJson(API.login, { userName, password });
+
+            if (res.ok && isSuccess(data)) {
+                setTip("登录成功", true);
+
+                // 这里把返回数据（如果有）存一下，后续你做“玩家面板/战斗”会很爽
+                // 你 Result 可能是 {code:1,data:{...}}，也可能没 data
+                const payload = data && (data.data ?? data.payload ?? null);
+                localStorage.setItem("loginUser", JSON.stringify({ userName, payload, time: Date.now() }));
+
+                showLoginState(`已登录：${userName}`);
+            } else {
+                setTip(getMsg(data, "登录失败"), false);
+                showLoginState("");
+            }
+        } catch (e) {
+            setTip("网络错误/后端没开", false);
+            showLoginState("");
+        }
+    });
+
+    // Enter 键：默认触发登录（更顺手）
+    ["userName", "password"].forEach(id => {
+        $(id).addEventListener("keydown", (e) => {
+            if (e.key === "Enter") $("loginBtn").click();
+        });
+    });
+
+    // 页面刷新后恢复登录态显示（仅展示，不保证后端有 session）
+    const cached = JSON.parse(localStorage.getItem("loginUser") || "null");
+    if (cached && cached.userName) {
+        showLoginState(`已登录：${cached.userName}`);
+    }
+</script>
+
+</body>
+</html>

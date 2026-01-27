@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Game</title>
+    <style>
+        body{margin:0;background:#0b0b0b;color:#fff;font-family:Arial,"Microsoft YaHei",sans-serif;}
+
+        /* 右上角登录框 */
+        .top-right-form{
+            position:fixed;top:12px;right:12px;
+            display:flex;align-items:center;gap:6px;
+            padding:10px;background:#121212;
+            border:1px solid rgba(255,255,255,.15);
+            border-radius:12px;z-index:999;
+        }
+        .top-right-form input{
+            width:92px;padding:6px 8px;border-radius:8px;
+            border:1px solid rgba(255,255,255,.25);
+            background:rgba(255,255,255,.05);
+            color:#fff;font-size:12px;outline:none;
+        }
+        .top-right-form button{
+            width:58px;height:28px;border-radius:8px;
+            border:1px solid rgba(255,255,255,.25);
+            background:#fff;color:#111;font-weight:800;font-size:12px;cursor:pointer;
+        }
+        .top-right-form button.secondary{background:transparent;color:#fff;}
+        .mini-tip{font-size:12px;margin-left:6px;}
+        .mini-tip.ok{color:#9efc9e;}
+        .mini-tip.bad{color:#ffb3b3;}
+
+        /* ⭐ 左上角玩家信息块 */
+        .player-panel{
+            position:fixed;
+            top:12px;
+            left:12px;
+            width:160px;
+            padding:10px 12px;
+            background:#121212;
+            border:1px solid rgba(255,255,255,.15);
+            border-radius:12px;
+            font-size:12px;
+            line-height:1.7;
+            z-index:998;
+            display:none;
+        }
+        .player-panel b{font-size:13px;color:#fff;}
+    </style>
+</head>
+<body>
+
+<!-- 左上角玩家信息 -->
+<div class="player-panel" id="playerPanel"></div>
+
+<!-- 右上角登录注册 -->
+<div class="top-right-form">
+    <input id="userName" placeholder="用户名">
+    <input id="password" type="password" placeholder="密码">
+    <button id="registerBtn">注册</button>
+    <button id="loginBtn" class="secondary">登录</button>
+    <span class="mini-tip" id="tip"></span>
+</div>
+
+<script>
+    const API = { register:"/players/register", login:"/players/login" };
+    const $ = id => document.getElementById(id);
+
+    function setTip(msg, ok){
+        const tip = $("tip");
+        tip.textContent = msg || "";
+        tip.className = "mini-tip " + (ok ? "ok" : "bad");
+    }
+
+    function renderPlayer(p){
+        const box = $("playerPanel");
+        if(!p){ box.style.display="none"; return; }
+        box.style.display="block";
+        box.innerHTML =
+            `<b>${p.userName}</b><br>` +
+            `Lv: ${p.lv}<br>` +
+            `HP: ${p.hp}<br>` +
+            `MP: ${p.mp}<br>` +
+            `Money: ${p.money}<br>` +
+            `Exp: ${p.exp} / ${p.expMax}`;
+    }
+
+    async function postJson(url,data){
+        const res = await fetch(url,{
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify(data)
+        });
+        return await res.json();
+    }
+
+    /* 注册 */
+    $("registerBtn").onclick = async ()=>{
+        const userName=$("userName").value.trim();
+        const password=$("password").value;
+        if(!userName||!password){ setTip("不能为空",false); return; }
+        const r=await postJson(API.register,{userName,password});
+        if(r.code===1) setTip("注册成功",true);
+        else setTip(r.msg,false);
+    };
+
+    /* 登录 */
+    $("loginBtn").onclick = async ()=>{
+        const userName=$("userName").value.trim();
+        const password=$("password").value;
+        if(!userName||!password){ setTip("不能为空",false); return; }
+        const r=await postJson(API.login,{userName,password});
+        if(r.code===1){
+            setTip("登录成功",true);
+            renderPlayer(r.data);
+            localStorage.setItem("player",JSON.stringify(r.data));
+        }else{
+            setTip(r.msg,false);
+            renderPlayer(null);
+        }
+    };
+
+    /* 刷新恢复显示 */
+    const cache=JSON.parse(localStorage.getItem("player")||"null");
+    if(cache) renderPlayer(cache);
+</script>
+
+</body>
+</html>
