@@ -27,4 +27,8 @@ public class PlayerServiceImpl implements PlayerService {
             return Result.success(playerMapper.login(loginReq));
         }
     }
+
+    public void initSkill(RegisterReq registerReq){
+        playerMapper.init(playerMapper.getPlayerId(registerReq));
+    }
 }

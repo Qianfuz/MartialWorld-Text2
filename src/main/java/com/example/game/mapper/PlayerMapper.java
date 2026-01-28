@@ -15,4 +15,10 @@ public interface PlayerMapper {
 
     @Select("select * from player where username = #{userName} && password = #{password}")
     Player login(LoginReq loginReq);
+
+    @Insert("insert ignore into skill_lv (player_id, skill_id, lv) SELECT #{playerId},id,0 from skill_define")
+    void init(Integer playerId);
+
+    @Select("select id from player where username = #{userName}")
+    Integer getPlayerId(RegisterReq registerReq);
 }

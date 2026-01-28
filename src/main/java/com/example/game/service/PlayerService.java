@@ -9,5 +9,8 @@ public interface PlayerService {
     Integer register(RegisterReq registerReq);
 
     Result login(LoginReq loginReq);
+
+
+    void initSkill(RegisterReq registerReq);
 }
 

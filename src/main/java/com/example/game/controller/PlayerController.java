@@ -18,6 +18,7 @@ public class PlayerController {
     @PostMapping("/players/register")
     public Result register(@RequestBody RegisterReq registerReq){
         if(playerService.register(registerReq)>0){
+            playerService.initSkill(registerReq);
             return Result.success();
         } else {
             return Result.error("注册失败");
