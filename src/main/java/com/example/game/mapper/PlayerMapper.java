@@ -2,10 +2,14 @@ package com.example.game.mapper;
 
 import com.example.game.controller.dto.LoginReq;
 import com.example.game.controller.dto.RegisterReq;
+import com.example.game.controller.dto.ShowReq;
 import com.example.game.pojo.Player;
+import com.example.game.pojo.PlayerSkill;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 @Mapper
 public interface PlayerMapper {
@@ -21,4 +25,7 @@ public interface PlayerMapper {
 
     @Select("select id from player where username = #{userName}")
     Integer getPlayerId(RegisterReq registerReq);
+
+    @Select("select ID, SKILL_NAME, LIMITED_LV, UPGRADE_COST, BASIC_ATK, BASIC_MP_COST, TYPE ,sl.lv from skill_define sd join game.skill_lv sl on sd.id = sl.skill_id where player_id = #{playerId};")
+    List<PlayerSkill> show(ShowReq showReq);
 }

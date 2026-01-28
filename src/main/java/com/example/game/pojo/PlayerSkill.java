@@ -3,7 +3,7 @@ package com.example.game.pojo;
 import lombok.Data;
 
 @Data
-public class Skill {
+public class PlayerSkill {
     private Integer id;
     private String skillName;
     private Integer limitedLv;
@@ -11,5 +11,10 @@ public class Skill {
     private Integer basicATK;
     private Integer basicMpCost;
     private Integer type;
+
+    private Integer lv;
+    private Integer curATK;
+    private Integer curMpCost;
+    private Integer curUpgradeCost;
 
 }

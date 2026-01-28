@@ -2,6 +2,7 @@ package com.example.game.service;
 
 import com.example.game.controller.dto.LoginReq;
 import com.example.game.controller.dto.RegisterReq;
+import com.example.game.controller.dto.ShowReq;
 import com.example.game.pojo.Result;
 
 
@@ -10,7 +11,8 @@ public interface PlayerService {
 
     Result login(LoginReq loginReq);
 
-
     void initSkill(RegisterReq registerReq);
+
+    Result show(ShowReq showReq);
 }
 

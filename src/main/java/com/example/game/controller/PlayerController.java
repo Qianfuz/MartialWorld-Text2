@@ -2,6 +2,7 @@ package com.example.game.controller;
 
 import com.example.game.controller.dto.LoginReq;
 import com.example.game.controller.dto.RegisterReq;
+import com.example.game.controller.dto.ShowReq;
 import com.example.game.pojo.Result;
 import com.example.game.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,5 +31,9 @@ public class PlayerController {
         return playerService.login(loginReq);
     }
 
+    @PostMapping("players/skill/show")
+    public Result show(@RequestBody ShowReq showReq){
+        return playerService.show(showReq);
+    }
 
 }
