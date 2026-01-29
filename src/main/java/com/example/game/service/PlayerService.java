@@ -13,8 +13,6 @@ public interface PlayerService {
 
     void init(RegisterReq registerReq);
 
-    Result show(ShowReq showReq);
 
-    Result showSlot(ShowReq showReq);
 }
 

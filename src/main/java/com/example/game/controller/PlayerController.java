@@ -31,14 +31,5 @@ public class PlayerController {
         return playerService.login(loginReq);
     }
 
-    @PostMapping("/players/skills/showskill")
-    public Result show(@RequestBody ShowReq showReq){
-        return playerService.show(showReq);
-    }
-
-    @PostMapping("/players/skills/showslot")
-    public Result showSlot(@RequestBody ShowReq showReq){
-        return playerService.showSlot(showReq);
-    }
 
 }

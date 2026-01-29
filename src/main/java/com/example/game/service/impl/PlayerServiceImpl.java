@@ -38,25 +38,5 @@ public class PlayerServiceImpl implements PlayerService {
         playerMapper.init2(playerMapper.getPlayerId(registerReq));
     }
 
-    @Override
-    public Result show(ShowReq showReq) {
-        List<PlayerSkill>playerSkillList = playerMapper.show(showReq);
-        for (int i = 0; i < playerSkillList.size(); i++) {
-            if(playerSkillList.get(i).getLv()==0){
-                playerSkillList.get(i).setCurATK(playerSkillList.get(i).getBasicAtk());
-                playerSkillList.get(i).setCurMpCost(playerSkillList.get(i).getBasicMpCost());
-                playerSkillList.get(i).setCurUpgradeCost(playerSkillList.get(i).getUpgradeCost());
-            } else {
-                playerSkillList.get(i).setCurATK(playerSkillList.get(i).getBasicAtk()*(20+playerSkillList.get(i).getLv()*3)/20);
-                playerSkillList.get(i).setCurMpCost(playerSkillList.get(i).getBasicMpCost()*(20+playerSkillList.get(i).getLv()*3)/20);
-                playerSkillList.get(i).setCurUpgradeCost(playerSkillList.get(i).getUpgradeCost()*(20+playerSkillList.get(i).getLv()*3)/20);
-            }
-        }
-        return Result.success(playerSkillList);
-    }
 
-    @Override
-    public Result showSlot(ShowReq showReq) {
-        return Result.success(playerMapper.showSlot(showReq));
-    }
 }
