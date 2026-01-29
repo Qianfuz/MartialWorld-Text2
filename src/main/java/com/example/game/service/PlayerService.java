@@ -11,8 +11,10 @@ public interface PlayerService {
 
     Result login(LoginReq loginReq);
 
-    void initSkill(RegisterReq registerReq);
+    void init(RegisterReq registerReq);
 
     Result show(ShowReq showReq);
+
+    Result showSlot(ShowReq showReq);
 }
 

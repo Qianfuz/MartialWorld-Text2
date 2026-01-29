@@ -87,7 +87,7 @@
             box-sizing:border-box;
         }
         .modal .card{
-            width:min(920px, 96vw);
+            width:min(1100px, 96vw);
             background:#121212;
             border:1px solid rgba(255,255,255,.15);
             border-radius:16px;
@@ -147,6 +147,37 @@
             padding:12px 14px 14px;
         }
 
+        /* 装备槽（8个框）- 不显示数字，只按顺序摆 */
+        .slot-wrap{
+            display:flex;
+            gap:10px;
+            flex-wrap:wrap;
+            margin-bottom:12px;
+        }
+        .slot{
+            width:calc(25% - 8px);
+            min-width:150px;
+            height:48px;
+            border-radius:12px;
+            border:1px solid rgba(255,255,255,.15);
+            background:rgba(255,255,255,.04);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:900;
+            font-size:12px;
+            color:#fff;
+            box-sizing:border-box;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+            padding:0 10px;
+        }
+        .slot.empty{
+            opacity:.75;
+            font-weight:800;
+        }
+
         /* 表格 */
         table{
             width:100%;
@@ -188,15 +219,12 @@
 </head>
 <body>
 
-<!-- 左上角玩家信息 -->
 <div class="player-panel" id="playerPanel"></div>
 
-<!-- 技能按钮（登录后显示） -->
 <div class="skill-btn" id="skillBtnWrap">
     <button id="openSkillBtn">技能</button>
 </div>
 
-<!-- 右上角登录注册 -->
 <div class="top-right-form">
     <input id="userName" placeholder="用户名">
     <input id="password" type="password" placeholder="密码">
@@ -205,7 +233,6 @@
     <span class="mini-tip" id="tip"></span>
 </div>
 
-<!-- 技能弹层 -->
 <div class="modal" id="skillModal">
     <div class="card">
         <div class="head">
@@ -216,9 +243,7 @@
                 <button class="close-btn" id="closeModal">关闭</button>
             </div>
         </div>
-        <div class="body" id="modalBody">
-            <!-- 表格会渲染到这里 -->
-        </div>
+        <div class="body" id="modalBody"></div>
     </div>
 </div>
 
@@ -226,7 +251,8 @@
     const API = {
         register: "/players/register",
         login: "/players/login",
-        showSkill: "/players/skills/show"
+        showSkill: "/players/skills/showskill",
+        showSlot: "/players/skills/showslot"
     };
 
     const $ = (id) => document.getElementById(id);
@@ -248,12 +274,12 @@
         box.style.display="block";
         skillWrap.style.display="block";
         box.innerHTML =
-            `<b>${p.userName}</b><br>` +
-            `Lv: ${p.lv}<br>` +
-            `HP: ${p.hp}<br>` +
-            `MP: ${p.mp}<br>` +
-            `Money: ${p.money}<br>` +
-            `Exp: ${p.exp} / ${p.expMax}`;
+            `<b>${escapeHtml(p.userName)}</b><br>` +
+            `Lv: ${escapeHtml(p.lv)}<br>` +
+            `HP: ${escapeHtml(p.hp)}<br>` +
+            `MP: ${escapeHtml(p.mp)}<br>` +
+            `Money: ${escapeHtml(p.money)}<br>` +
+            `Exp: ${escapeHtml(p.exp)} / ${escapeHtml(p.expMax)}`;
     }
 
     async function postJson(url,data){
@@ -273,33 +299,94 @@
         localStorage.setItem("player", JSON.stringify(p));
     }
 
-    function openModal(){
-        $("skillModal").style.display="flex";
-    }
+    function openModal(){ $("skillModal").style.display="flex"; }
     function closeModal(){
         $("skillModal").style.display="none";
+        // 退出页面后消失：清空内容 + 清空缓存
+        $("modalBody").innerHTML = "";
+        lastSkillsCache = null;
+        lastSlotsCache = null;
+        skillIdNameMap = null;
     }
     $("closeModal").onclick = closeModal;
     $("skillModal").addEventListener("click", (e)=>{
         if(e.target === $("skillModal")) closeModal();
     });
 
-    // 统一把 type 变成数字（后端可能返回字符串）
-    function toNum(x){
+    function toInt(x){
+        // 只接受真正的整数；null/undefined/""/"null" 都会变成 null
+        if(x === null || x === undefined) return null;
+        if(typeof x === "string" && x.trim() === "") return null;
         const n = Number(x);
-        return Number.isFinite(n) ? n : null;
+        if(!Number.isFinite(n)) return null;
+        const i = Math.trunc(n);
+        return Number.isFinite(i) ? i : null;
     }
 
-    // 过滤 type：技能(1/3/4) or 神技(2)
     function filterSkillsByMode(list, mode){
         if(!Array.isArray(list)) return [];
         if(mode === "god"){
-            return list.filter(s => toNum(s.type) === 2);
+            return list.filter(s => toInt(s.type) === 2);
         }
-        return list.filter(s => [1,3,4].includes(toNum(s.type)));
+        return list.filter(s => [1,3,4].includes(toInt(s.type)));
     }
 
-    // 渲染：技能(1/3/4) 需要显示 limitedLv
+    function buildSkillIdNameMap(allSkills){
+        const map = new Map();
+        (allSkills || []).forEach(s=>{
+            const id = toInt(s.id);
+            if(id != null){
+                map.set(id, (s.skillName ?? ""));
+            }
+        });
+        return map;
+    }
+
+    // 关键：slotIndex 是 1..8（不是 0..7）
+    function renderSlots(slots, idNameMap){
+        // arr[1..8] 有意义；arr[0] 不用
+        const arr = new Array(9).fill(null);
+
+        (slots || []).forEach(it=>{
+            const idx = toInt(it.slotIndex);
+            if(idx != null && idx >= 1 && idx <= 8){
+                arr[idx] = it; // it.skillId 可能为 null
+            }
+        });
+
+        // 按 1..8 顺序渲染 8 个框，不显示数字
+        let boxes = "";
+        for(let i=1;i<=8;i++){
+            const it = arr[i];
+            const skillId = it ? toInt(it.skillId) : null;
+
+            // 你要求：skillId == null 必须显示“空”
+            if(skillId == null){
+                boxes += `<div class="slot empty">空</div>`;
+                continue;
+            }
+
+            // 否则显示技能名。前提：showskill 里必须包含 id + skillName
+            const name = idNameMap && idNameMap.get(skillId) ? idNameMap.get(skillId) : "";
+
+            // 如果后端返回的 skillId 不在 skills 列表里：前端无法凭空知道名字，只能显示兜底文本
+            // 你不想要奇怪字符，我这里兜底成“未知技能”
+            const text = name ? name : "未知技能";
+            boxes += `<div class="slot">${escapeHtml(text)}</div>`;
+        }
+
+        return `<div class="slot-wrap">${boxes}</div>`;
+    }
+
+    function escapeHtml(s){
+        return String(s ?? "")
+            .replaceAll("&","&amp;")
+            .replaceAll("<","&lt;")
+            .replaceAll(">","&gt;")
+            .replaceAll('"',"&quot;")
+            .replaceAll("'","&#39;");
+    }
+
     function renderSkillTableNormal(list){
         const rows = list.map(s => {
             const name = s.skillName ?? "";
@@ -310,12 +397,12 @@
             const curUpgradeCost = s.curUpgradeCost ?? "";
             return `
         <tr>
-          <td>${name}</td>
-          <td>${limitedLv}</td>
-          <td>${lv}</td>
-          <td>${curATK}</td>
-          <td>${curMpCost}</td>
-          <td>${curUpgradeCost}</td>
+          <td>${escapeHtml(name)}</td>
+          <td>${escapeHtml(limitedLv)}</td>
+          <td>${escapeHtml(lv)}</td>
+          <td>${escapeHtml(curATK)}</td>
+          <td>${escapeHtml(curMpCost)}</td>
+          <td>${escapeHtml(curUpgradeCost)}</td>
         </tr>
       `;
         }).join("");
@@ -339,7 +426,6 @@
     `;
     }
 
-    // 渲染：神技(2) 不展示 limitedLv，整体小一点
     function renderSkillTableGod(list){
         const rows = list.map(s => {
             const name = s.skillName ?? "";
@@ -349,11 +435,11 @@
             const curUpgradeCost = s.curUpgradeCost ?? "";
             return `
         <tr>
-          <td>${name}</td>
-          <td>${lv}</td>
-          <td>${curATK}</td>
-          <td>${curMpCost}</td>
-          <td>${curUpgradeCost}</td>
+          <td>${escapeHtml(name)}</td>
+          <td>${escapeHtml(lv)}</td>
+          <td>${escapeHtml(curATK)}</td>
+          <td>${escapeHtml(curMpCost)}</td>
+          <td>${escapeHtml(curUpgradeCost)}</td>
         </tr>
       `;
         }).join("");
@@ -378,18 +464,22 @@
     `;
     }
 
-    // 拉取技能数据（后端返回 List<PlayerSkill>）
     async function fetchSkills(playerId){
         const r = await postJson(API.showSkill, { playerId });
-        if(r && r.code === 1){
-            return Array.isArray(r.data) ? r.data : [];
-        }
-        throw new Error((r && r.msg) ? r.msg : "查询失败");
+        if(r && r.code === 1) return Array.isArray(r.data) ? r.data : [];
+        throw new Error((r && r.msg) ? r.msg : "查询技能失败");
     }
 
-    // 当前模式：normal 或 god
+    async function fetchSlots(playerId){
+        const r = await postJson(API.showSlot, { playerId });
+        if(r && r.code === 1) return Array.isArray(r.data) ? r.data : [];
+        throw new Error((r && r.msg) ? r.msg : "查询槽位失败");
+    }
+
     let currentMode = "normal";
-    let lastSkillsCache = null; // 缓存一次请求结果
+    let lastSkillsCache = null;
+    let lastSlotsCache = null;
+    let skillIdNameMap = null;
 
     function setTabActive(){
         const tn = $("tabNormal");
@@ -405,31 +495,37 @@
         }
     }
 
-    function renderSkillsIntoModal(){
-        const all = lastSkillsCache || [];
+    function renderAll(){
+        const allSkills = lastSkillsCache || [];
+        const slots = (lastSlotsCache || []).slice().sort((a,b)=> (toInt(a.slotIndex) ?? 0) - (toInt(b.slotIndex) ?? 0));
+        const idNameMap = skillIdNameMap || new Map();
+
+        const slotHtml = renderSlots(slots, idNameMap);
+
+        let tableHtml = "";
         if(currentMode === "god"){
-            const list = filterSkillsByMode(all, "god");
-            $("modalBody").innerHTML = renderSkillTableGod(list);
+            tableHtml = renderSkillTableGod(filterSkillsByMode(allSkills, "god"));
         }else{
-            const list = filterSkillsByMode(all, "normal");
-            $("modalBody").innerHTML = renderSkillTableNormal(list);
+            tableHtml = renderSkillTableNormal(filterSkillsByMode(allSkills, "normal"));
         }
+
+        $("modalBody").innerHTML = slotHtml + tableHtml;
         setTabActive();
     }
 
     $("tabNormal").onclick = ()=>{
         currentMode = "normal";
-        renderSkillsIntoModal();
+        renderAll();
     };
     $("tabGod").onclick = ()=>{
         currentMode = "god";
-        renderSkillsIntoModal();
+        renderAll();
     };
 
-    // 打开技能弹窗：查询一次并渲染
+    // 技能按钮：同时拉 showskill + showslot
     $("openSkillBtn").onclick = async ()=>{
         const p = getPlayerCache();
-        if(!p || !p.id){
+        if(!p || p.id == null){
             setTip("请先登录", false);
             return;
         }
@@ -439,11 +535,21 @@
         openModal();
 
         try{
-            // 每次打开都重新拉一次，保证“实时计算”的数据是新的
-            lastSkillsCache = await fetchSkills(p.id);
-            renderSkillsIntoModal();
+            const playerId = p.id;
+
+            const [skills, slots] = await Promise.all([
+                fetchSkills(playerId),
+                fetchSlots(playerId)
+            ]);
+
+            lastSkillsCache = skills;
+            lastSlotsCache = slots;
+            skillIdNameMap = buildSkillIdNameMap(skills);
+
+            renderAll();
         }catch(err){
-            $("modalBody").innerHTML = `<div class="hint">加载失败：<code>${String(err.message || err)}</code></div>`;
+            $("modalBody").innerHTML =
+                `<div class="hint">加载失败：<code>${escapeHtml(String(err.message || err))}</code></div>`;
         }
     };
 

@@ -8,7 +8,7 @@ public class PlayerSkill {
     private String skillName;
     private Integer limitedLv;
     private Integer upgradeCost;
-    private Integer basicATK;
+    private Integer basicAtk;
     private Integer basicMpCost;
     private Integer type;
 
