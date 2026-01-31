@@ -3,6 +3,7 @@ package com.example.game.service.impl;
 import com.example.game.controller.dto.LoginReq;
 import com.example.game.controller.dto.RegisterReq;
 import com.example.game.controller.dto.ShowReq;
+import com.example.game.controller.dto.UpdatePlayerReq;
 import com.example.game.mapper.PlayerMapper;
 import com.example.game.pojo.PlayerSkill;
 import com.example.game.pojo.Result;
@@ -36,6 +37,11 @@ public class PlayerServiceImpl implements PlayerService {
     public void init(RegisterReq registerReq){
         playerMapper.init1(playerMapper.getPlayerId(registerReq));
         playerMapper.init2(playerMapper.getPlayerId(registerReq));
+    }
+
+    @Override
+    public Result updatePlayer(UpdatePlayerReq updatePlayerReq) {
+        return Result.success(playerMapper.getPlayer(updatePlayerReq.playerId));
     }
 
 

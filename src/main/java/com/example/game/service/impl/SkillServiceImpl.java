@@ -1,8 +1,10 @@
 package com.example.game.service.impl;
 
 import com.example.game.controller.dto.ShowReq;
+import com.example.game.controller.dto.UpgradeReq;
 import com.example.game.mapper.PlayerMapper;
 import com.example.game.mapper.SkillMapper;
+import com.example.game.pojo.Player;
 import com.example.game.pojo.PlayerSkill;
 import com.example.game.pojo.Result;
 import com.example.game.service.SkillService;
@@ -14,8 +16,14 @@ import java.util.List;
 public class SkillServiceImpl implements SkillService {
 
 
-    @Autowired
     private SkillMapper skillMapper;
+    private PlayerMapper playerMapper;
+    @Autowired
+    public void SkillService(SkillMapper skillMapper,PlayerMapper playerMapper){
+        this.skillMapper=skillMapper;
+        this.playerMapper=playerMapper;
+    }
+
 
     @Override
     public Result show(ShowReq showReq) {
@@ -37,5 +45,22 @@ public class SkillServiceImpl implements SkillService {
     @Override
     public Result showSlot(ShowReq showReq) {
         return Result.success(skillMapper.showSlot(showReq));
+    }
+
+
+
+    @Override
+    public Result upgrade(UpgradeReq upgradeReq) {
+        Player p = playerMapper.getPlayer(upgradeReq.getPlayerId());
+        PlayerSkill ps = skillMapper.getSkill(upgradeReq);
+        if(p.getMoney()>=ps.getUpgradeCost()*(20+ps.getLv()*3)/20 && p.getLv()>=ps.getLimitedLv()){
+            p.setMoney(p.getMoney()-ps.getUpgradeCost()*(20+ps.getLv()*3)/20);
+            skillMapper.upgrade(upgradeReq);
+            playerMapper.updatePlayer(p);
+            return Result.success("升级成功");
+        } else {
+            return Result.error("升级失败");
+        }
+
     }
 }
