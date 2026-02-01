@@ -12,4 +12,7 @@ public interface EnemyMapper {
     @Select("select id, basic_hp, name, enemy_lv from enemy_define ed join enemy_init ei on ed.id = ei.enemy_id")
     List<EnemyDefine> showEnemy();
 
+    @Select("select id, basic_hp, name from enemy_define where id = #{enemyId}")
+    EnemyDefine getEnemyDefine(Integer enemyId);
+
 }
