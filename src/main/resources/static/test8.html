@@ -1,0 +1,980 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Game</title>
+    <style>
+        body{margin:0;background:#0b0b0b;color:#fff;font-family:Arial,"Microsoft YaHei",sans-serif;}
+
+        /* 右上角登录框 */
+        .top-right-form{
+            position:fixed;top:12px;right:12px;
+            display:flex;align-items:center;gap:6px;
+            padding:10px;background:#121212;
+            border:1px solid rgba(255,255,255,.15);
+            border-radius:12px;z-index:999;
+        }
+        .top-right-form input{
+            width:92px;padding:6px 8px;border-radius:8px;
+            border:1px solid rgba(255,255,255,.25);
+            background:rgba(255,255,255,.05);
+            color:#fff;font-size:12px;outline:none;
+        }
+        .top-right-form button{
+            width:58px;height:28px;border-radius:8px;
+            border:1px solid rgba(255,255,255,.25);
+            background:#fff;color:#111;font-weight:800;font-size:12px;cursor:pointer;
+        }
+        .top-right-form button.secondary{background:transparent;color:#fff;}
+        .mini-tip{font-size:12px;margin-left:6px;}
+        .mini-tip.ok{color:#9efc9e;}
+        .mini-tip.bad{color:#ffb3b3;}
+
+        /* 左上角玩家信息块 */
+        .player-panel{
+            position:fixed;
+            top:12px;
+            left:12px;
+            width:160px;
+            padding:10px 12px;
+            background:#121212;
+            border:1px solid rgba(255,255,255,.15);
+            border-radius:12px;
+            font-size:12px;
+            line-height:1.7;
+            z-index:998;
+            display:none;
+        }
+        .player-panel b{font-size:13px;color:#fff;}
+        .player-panel .update-btn{
+            margin-top:8px;
+            width:100%;
+            height:28px;
+            border-radius:10px;
+            border:1px solid rgba(255,255,255,.25);
+            background:#fff;
+            color:#111;
+            font-weight:900;
+            font-size:12px;
+            cursor:pointer;
+        }
+
+        /* 技能按钮（左侧，玩家信息块下方） */
+        .skill-btn{
+            position:fixed;
+            top:190px;
+            left:12px;
+            width:184px;
+            padding:10px 12px;
+            background:#121212;
+            border:1px solid rgba(255,255,255,.15);
+            border-radius:12px;
+            z-index:998;
+            display:none;
+            box-sizing:border-box;
+        }
+        .skill-btn button{
+            width:100%;
+            height:32px;
+            border-radius:10px;
+            border:1px solid rgba(255,255,255,.25);
+            background:#fff;
+            color:#111;
+            font-weight:900;
+            font-size:12px;
+            cursor:pointer;
+        }
+
+        /* 技能弹层 */
+        .modal{
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,.6);
+            display:none;
+            align-items:center;
+            justify-content:center;
+            z-index:1000;
+            padding:20px;
+            box-sizing:border-box;
+        }
+        .modal .card{
+            width:min(1100px, 96vw);
+            background:#121212;
+            border:1px solid rgba(255,255,255,.15);
+            border-radius:16px;
+            box-shadow:0 20px 60px rgba(0,0,0,.55);
+            overflow:hidden;
+        }
+        .modal .head{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:10px;
+            padding:12px 14px;
+            border-bottom:1px solid rgba(255,255,255,.12);
+        }
+        .modal .title{
+            font-weight:900;
+            font-size:14px;
+            letter-spacing:.5px;
+        }
+        .modal .tabs{
+            display:flex;
+            gap:8px;
+            align-items:center;
+            justify-content:flex-end;
+            flex-wrap:wrap;
+        }
+        .tab-btn{
+            height:28px;
+            padding:0 10px;
+            border-radius:10px;
+            border:1px solid rgba(255,255,255,.25);
+            background:transparent;
+            color:#fff;
+            font-weight:800;
+            font-size:12px;
+            cursor:pointer;
+            opacity:.9;
+        }
+        .tab-btn.active{
+            background:#fff;
+            color:#111;
+            opacity:1;
+        }
+        .close-btn{
+            height:28px;
+            padding:0 10px;
+            border-radius:10px;
+            border:1px solid rgba(255,255,255,.25);
+            background:transparent;
+            color:#fff;
+            font-weight:800;
+            font-size:12px;
+            cursor:pointer;
+        }
+
+        .modal .body{
+            padding:12px 14px 14px;
+        }
+
+        /* 装备槽（8个框）- 不显示数字，只按顺序摆 */
+        .slot-wrap{
+            display:flex;
+            gap:10px;
+            flex-wrap:wrap;
+            margin-bottom:12px;
+        }
+        .slot{
+            width:calc(25% - 8px);
+            min-width:150px;
+            height:48px;
+            border-radius:12px;
+            border:1px solid rgba(255,255,255,.15);
+            background:rgba(255,255,255,.04);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:900;
+            font-size:12px;
+            color:#fff;
+            box-sizing:border-box;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+            padding:0 10px;
+        }
+        .slot.empty{
+            opacity:.75;
+            font-weight:800;
+        }
+
+        /* 表格 */
+        table{
+            width:100%;
+            border-collapse:collapse;
+            table-layout:fixed;
+            font-size:12px;
+        }
+        th, td{
+            border:1px solid rgba(255,255,255,.12);
+            padding:8px 10px;
+            text-align:center;
+            word-break:break-all;
+        }
+        thead th{
+            background:rgba(255,255,255,.06);
+            font-weight:900;
+        }
+        tbody tr:hover{
+            background:rgba(255,255,255,.04);
+        }
+
+        /* 神技：小一点 */
+        .small table{font-size:11px;}
+        .small th,.small td{padding:6px 8px;}
+
+        .hint{
+            margin-top:10px;
+            font-size:12px;
+            opacity:.85;
+            line-height:1.6;
+        }
+        .hint code{
+            background:rgba(255,255,255,.08);
+            padding:2px 6px;
+            border-radius:8px;
+            border:1px solid rgba(255,255,255,.12);
+        }
+
+        /* 升级按钮样式 */
+        .up-btn{
+            height:26px;
+            padding:0 10px;
+            border-radius:10px;
+            border:1px solid rgba(255,255,255,.25);
+            background:#fff;
+            color:#111;
+            font-weight:900;
+            font-size:12px;
+            cursor:pointer;
+            white-space:nowrap;
+        }
+        .up-btn:disabled{
+            opacity:.5;
+            cursor:not-allowed;
+        }
+
+        /* =========================
+           ✅ 新增：战斗列表 UI
+           ========================= */
+
+        /* 右侧边缘中间：窄按钮，高度 1/4 屏幕 */
+        .enemy-float-btn{
+            position:fixed;
+            right:12px;
+            top:50%;
+            transform:translateY(-50%);
+            width:34px;
+            height:25vh;
+            min-height:120px;
+            border-radius:14px;
+            border:1px solid rgba(255,255,255,.18);
+            background:#121212;
+            z-index:998;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            cursor:pointer;
+            user-select:none;
+        }
+        .enemy-float-btn span{
+            writing-mode:vertical-rl;
+            text-orientation:mixed;
+            font-weight:900;
+            font-size:12px;
+            letter-spacing:2px;
+            opacity:.95;
+        }
+
+        /* 右侧面板：占屏幕宽度 1/4，贴右边缘；上下留出“登录框大小” */
+        .enemy-panel{
+            position:fixed;
+            right:12px;
+            top:70px;          /* 给右上角登录框留空间 */
+            bottom:70px;       /* 下方也留空同等量 */
+            width:min(25vw, 360px);
+            min-width:260px;
+            background:#121212;
+            border:1px solid rgba(255,255,255,.15);
+            border-radius:16px;
+            box-shadow:0 20px 60px rgba(0,0,0,.55);
+            z-index:998;
+            display:none;
+            overflow:hidden;
+        }
+        .enemy-panel .head{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            padding:10px 12px;
+            border-bottom:1px solid rgba(255,255,255,.12);
+        }
+        .enemy-panel .head .t{
+            font-weight:900;
+            font-size:13px;
+            letter-spacing:.5px;
+        }
+        .enemy-panel .head .x{
+            height:26px;
+            padding:0 10px;
+            border-radius:10px;
+            border:1px solid rgba(255,255,255,.25);
+            background:transparent;
+            color:#fff;
+            font-weight:900;
+            font-size:12px;
+            cursor:pointer;
+        }
+        .enemy-panel .body{
+            padding:10px 12px 12px;
+            height:calc(100% - 48px);
+            overflow:auto;
+        }
+
+        /* 怪物列表项：左边名称等级，右边战斗按钮 */
+        .enemy-row{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:10px;
+            padding:10px 10px;
+            border:1px solid rgba(255,255,255,.10);
+            background:rgba(255,255,255,.04);
+            border-radius:14px;
+            margin-bottom:10px;
+        }
+        .enemy-row .label{
+            font-weight:900;
+            font-size:12px;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+        }
+        .enemy-row .fight-btn{
+            height:26px;
+            padding:0 10px;
+            border-radius:10px;
+            border:1px solid rgba(255,255,255,.25);
+            background:#fff;
+            color:#111;
+            font-weight:900;
+            font-size:12px;
+            cursor:pointer;
+            white-space:nowrap;
+        }
+
+        /* 战斗页面：同样 1/4 宽度，右侧边缘；用于点击“战斗按钮”后显示 */
+        .fight-panel{
+            position:fixed;
+            right:12px;
+            top:70px;
+            bottom:70px;
+            width:min(25vw, 360px);
+            min-width:260px;
+            background:#121212;
+            border:1px solid rgba(255,255,255,.15);
+            border-radius:16px;
+            box-shadow:0 20px 60px rgba(0,0,0,.55);
+            z-index:999; /* 比 enemy-panel 更上层 */
+            display:none;
+            overflow:hidden;
+        }
+        .fight-panel .head{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            padding:10px 12px;
+            border-bottom:1px solid rgba(255,255,255,.12);
+        }
+        .fight-panel .head .t{
+            font-weight:900;
+            font-size:13px;
+        }
+        .fight-panel .head .back{
+            height:26px;
+            padding:0 10px;
+            border-radius:10px;
+            border:1px solid rgba(255,255,255,.25);
+            background:transparent;
+            color:#fff;
+            font-weight:900;
+            font-size:12px;
+            cursor:pointer;
+        }
+        .fight-panel .body{
+            padding:12px;
+            height:calc(100% - 48px);
+            overflow:auto;
+            font-size:12px;
+            line-height:1.7;
+            opacity:.92;
+        }
+        .fight-placeholder{
+            border:1px dashed rgba(255,255,255,.18);
+            border-radius:14px;
+            padding:12px;
+            background:rgba(255,255,255,.03);
+        }
+    </style>
+</head>
+<body>
+
+<div class="player-panel" id="playerPanel"></div>
+
+<div class="skill-btn" id="skillBtnWrap">
+    <button id="openSkillBtn">技能</button>
+</div>
+
+<div class="top-right-form">
+    <input id="userName" placeholder="用户名">
+    <input id="password" type="password" placeholder="密码">
+    <button id="registerBtn">注册</button>
+    <button id="loginBtn" class="secondary">登录</button>
+    <span class="mini-tip" id="tip"></span>
+</div>
+
+<div class="modal" id="skillModal">
+    <div class="card">
+        <div class="head">
+            <div class="title" id="modalTitle">技能</div>
+            <div class="tabs">
+                <button class="tab-btn active" id="tabNormal">技能(1/3/4)</button>
+                <button class="tab-btn" id="tabGod">神技(2)</button>
+                <button class="close-btn" id="closeModal">关闭</button>
+            </div>
+        </div>
+        <div class="body" id="modalBody"></div>
+    </div>
+</div>
+
+<!-- ✅ 新增：战斗列表按钮（右侧边缘中间） -->
+<div class="enemy-float-btn" id="enemyFloatBtn"><span>战斗列表</span></div>
+
+<!-- ✅ 新增：怪物列表面板 -->
+<div class="enemy-panel" id="enemyPanel">
+    <div class="head">
+        <div class="t">怪物列表</div>
+        <button class="x" id="enemyPanelClose">关闭</button>
+    </div>
+    <div class="body" id="enemyPanelBody"></div>
+</div>
+
+<!-- ✅ 新增：战斗页面面板（不绑定 API，只展示） -->
+<div class="fight-panel" id="fightPanel">
+    <div class="head">
+        <div class="t" id="fightTitle">战斗</div>
+        <button class="back" id="fightBack">返回</button>
+    </div>
+    <div class="body" id="fightBody">
+        <div class="fight-placeholder">
+            这里是“战斗页面”占位内容。<br>
+            你点列表里的“战斗”按钮会打开这里，但目前不绑定任何 API。<br>
+            之后你要接入真正战斗接口时，我们直接在这里加请求 + 日志渲染就行。
+        </div>
+    </div>
+</div>
+
+<script>
+    const API = {
+        register: "/players/register",
+        login: "/players/login",
+        showSkill: "/players/skills/showskill",
+        showSlot: "/players/skills/showslot",
+        upgrade: "/players/skills/upgrade",
+        updatePlayer: "/players/update",
+
+        /* ✅ 新增：敌人列表（GET） */
+        showEnemy: "/enemys/showenemy"
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function setTip(msg, ok){
+        const tip = $("tip");
+        tip.textContent = msg || "";
+        tip.className = "mini-tip " + (ok ? "ok" : "bad");
+    }
+
+    function renderPlayer(p){
+        const box = $("playerPanel");
+        const skillWrap = $("skillBtnWrap");
+        if(!p){
+            box.style.display="none";
+            skillWrap.style.display="none";
+            return;
+        }
+        box.style.display="block";
+        skillWrap.style.display="block";
+        box.innerHTML =
+            `<b>${escapeHtml(p.userName)}</b><br>` +
+            `Lv: ${escapeHtml(p.lv)}<br>` +
+            `HP: ${escapeHtml(p.hp)}<br>` +
+            `MP: ${escapeHtml(p.mp)}<br>` +
+            `Money: ${escapeHtml(p.money)}<br>` +
+            `Exp: ${escapeHtml(p.exp)} / ${escapeHtml(p.expMax)}` +
+            `<button class="update-btn" id="btnUpdatePlayer">更新状态</button>`;
+
+        // 绑定更新状态按钮（UpdatePlayerReq: {playerId}）
+        $("btnUpdatePlayer").onclick = async ()=>{
+            const cur = getPlayerCache();
+            if(!cur || cur.id == null){ setTip("请先登录", false); return; }
+            try{
+                const r = await postJson(API.updatePlayer, { playerId: cur.id });
+                if(r && r.code === 1){
+                    if(r.data){
+                        renderPlayer(r.data);
+                        setPlayerCache(r.data);
+                    }
+                    setTip("状态已更新", true);
+                }else{
+                    setTip((r && r.msg) ? r.msg : "更新失败", false);
+                }
+            }catch(e){
+                setTip("更新失败", false);
+            }
+        };
+    }
+
+    async function postJson(url,data){
+        const res = await fetch(url,{
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify(data)
+        });
+        return await res.json();
+    }
+
+    /* ✅ 新增：GET 请求（敌人列表） */
+    async function getJson(url){
+        const res = await fetch(url, { method:"GET" });
+        return await res.json();
+    }
+
+    function getPlayerCache(){
+        return JSON.parse(localStorage.getItem("player") || "null");
+    }
+
+    function setPlayerCache(p){
+        localStorage.setItem("player", JSON.stringify(p));
+    }
+
+    function openModal(){ $("skillModal").style.display="flex"; }
+    function closeModal(){
+        $("skillModal").style.display="none";
+        $("modalBody").innerHTML = "";
+        lastSkillsCache = null;
+        lastSlotsCache = null;
+        skillIdNameMap = null;
+    }
+    $("closeModal").onclick = closeModal;
+    $("skillModal").addEventListener("click", (e)=>{
+        if(e.target === $("skillModal")) closeModal();
+    });
+
+    function toInt(x){
+        if(x === null || x === undefined) return null;
+        if(typeof x === "string" && x.trim() === "") return null;
+        const n = Number(x);
+        if(!Number.isFinite(n)) return null;
+        const i = Math.trunc(n);
+        return Number.isFinite(i) ? i : null;
+    }
+
+    function filterSkillsByMode(list, mode){
+        if(!Array.isArray(list)) return [];
+        if(mode === "god"){
+            return list.filter(s => toInt(s.type) === 2);
+        }
+        return list.filter(s => [1,3,4].includes(toInt(s.type)));
+    }
+
+    function buildSkillIdNameMap(allSkills){
+        const map = new Map();
+        (allSkills || []).forEach(s=>{
+            const id = toInt(s.id);
+            if(id != null){
+                map.set(id, (s.skillName ?? ""));
+            }
+        });
+        return map;
+    }
+
+    function renderSlots(slots, idNameMap){
+        const arr = new Array(9).fill(null);
+        (slots || []).forEach(it=>{
+            const idx = toInt(it.slotIndex);
+            if(idx != null && idx >= 1 && idx <= 8){
+                arr[idx] = it;
+            }
+        });
+
+        let boxes = "";
+        for(let i=1;i<=8;i++){
+            const it = arr[i];
+            const skillId = it ? toInt(it.skillId) : null;
+
+            if(skillId == null){
+                boxes += `<div class="slot empty">空</div>`;
+                continue;
+            }
+
+            const name = idNameMap && idNameMap.get(skillId) ? idNameMap.get(skillId) : "";
+            const text = name ? name : "未知技能";
+            boxes += `<div class="slot">${escapeHtml(text)}</div>`;
+        }
+
+        return `<div class="slot-wrap">${boxes}</div>`;
+    }
+
+    function escapeHtml(s){
+        return String(s ?? "")
+            .replaceAll("&","&amp;")
+            .replaceAll("<","&lt;")
+            .replaceAll(">","&gt;")
+            .replaceAll('"',"&quot;")
+            .replaceAll("'","&#39;");
+    }
+
+    function renderSkillTableNormal(list){
+        const rows = list.map(s => {
+            const skillId = toInt(s.id);
+            const name = s.skillName ?? "";
+            const limitedLv = s.limitedLv ?? "";
+            const lv = s.lv ?? "";
+            const curATK = s.curATK ?? "";
+            const curMpCost = s.curMpCost ?? "";
+            const curUpgradeCost = s.curUpgradeCost ?? "";
+            return `
+        <tr>
+          <td>${escapeHtml(name)}</td>
+          <td>${escapeHtml(limitedLv)}</td>
+          <td>${escapeHtml(lv)}</td>
+          <td>${escapeHtml(curATK)}</td>
+          <td>${escapeHtml(curMpCost)}</td>
+          <td>${escapeHtml(curUpgradeCost)}</td>
+          <td>
+            <button class="up-btn" data-skill-id="${skillId ?? ""}" ${skillId==null ? "disabled" : ""}>升级</button>
+          </td>
+        </tr>
+      `;
+        }).join("");
+
+        return `
+      <table>
+        <thead>
+          <tr>
+            <th style="width:20%">name</th>
+            <th style="width:12%">limitedlv</th>
+            <th style="width:8%">lv</th>
+            <th style="width:12%">curatk</th>
+            <th style="width:18%">curmpcost</th>
+            <th style="width:18%">curupgradecost</th>
+            <th style="width:12%">upgrade</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows || `<tr><td colspan="7" style="opacity:.8">暂无数据</td></tr>`}
+        </tbody>
+      </table>
+    `;
+    }
+
+    function renderSkillTableGod(list){
+        const rows = list.map(s => {
+            const skillId = toInt(s.id);
+            const name = s.skillName ?? "";
+            const lv = s.lv ?? "";
+            const curATK = s.curATK ?? "";
+            const curMpCost = s.curMpCost ?? "";
+            const curUpgradeCost = s.curUpgradeCost ?? "";
+            return `
+        <tr>
+          <td>${escapeHtml(name)}</td>
+          <td>${escapeHtml(lv)}</td>
+          <td>${escapeHtml(curATK)}</td>
+          <td>${escapeHtml(curMpCost)}</td>
+          <td>${escapeHtml(curUpgradeCost)}</td>
+          <td>
+            <button class="up-btn" data-skill-id="${skillId ?? ""}" ${skillId==null ? "disabled" : ""}>升级</button>
+          </td>
+        </tr>
+      `;
+        }).join("");
+
+        return `
+      <div class="small">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:24%">name</th>
+              <th style="width:8%">lv</th>
+              <th style="width:14%">curatk</th>
+              <th style="width:20%">curmpcost</th>
+              <th style="width:20%">curupgradecost</th>
+              <th style="width:14%">upgrade</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows || `<tr><td colspan="6" style="opacity:.8">暂无数据</td></tr>`}
+          </tbody>
+        </table>
+      </div>
+    `;
+    }
+
+    async function fetchSkills(playerId){
+        const r = await postJson(API.showSkill, { playerId });
+        if(r && r.code === 1) return Array.isArray(r.data) ? r.data : [];
+        throw new Error((r && r.msg) ? r.msg : "查询技能失败");
+    }
+
+    async function fetchSlots(playerId){
+        const r = await postJson(API.showSlot, { playerId });
+        if(r && r.code === 1) return Array.isArray(r.data) ? r.data : [];
+        throw new Error((r && r.msg) ? r.msg : "查询槽位失败");
+    }
+
+    async function doUpgrade(playerId, skillId){
+        const r = await postJson(API.upgrade, { playerId, skillId });
+        if(r && r.code === 1) return r;
+        throw new Error((r && r.msg) ? r.msg : "升级失败");
+    }
+
+    async function doUpdatePlayer(playerId){
+        const r = await postJson(API.updatePlayer, { playerId });
+        if(r && r.code === 1) return r;
+        throw new Error((r && r.msg) ? r.msg : "更新失败");
+    }
+
+    let currentMode = "normal";
+    let lastSkillsCache = null;
+    let lastSlotsCache = null;
+    let skillIdNameMap = null;
+
+    function setTabActive(){
+        const tn = $("tabNormal");
+        const tg = $("tabGod");
+        if(currentMode === "god"){
+            tg.classList.add("active");
+            tn.classList.remove("active");
+            $("modalTitle").textContent = "神技";
+        }else{
+            tn.classList.add("active");
+            tg.classList.remove("active");
+            $("modalTitle").textContent = "技能";
+        }
+    }
+
+    function renderAll(){
+        const allSkills = lastSkillsCache || [];
+        const slots = (lastSlotsCache || []).slice().sort((a,b)=> (toInt(a.slotIndex) ?? 0) - (toInt(b.slotIndex) ?? 0));
+        const idNameMap = skillIdNameMap || new Map();
+
+        const slotHtml = renderSlots(slots, idNameMap);
+
+        let tableHtml = "";
+        if(currentMode === "god"){
+            tableHtml = renderSkillTableGod(filterSkillsByMode(allSkills, "god"));
+        }else{
+            tableHtml = renderSkillTableNormal(filterSkillsByMode(allSkills, "normal"));
+        }
+
+        $("modalBody").innerHTML = slotHtml + tableHtml;
+        setTabActive();
+    }
+
+    $("tabNormal").onclick = ()=>{
+        currentMode = "normal";
+        renderAll();
+    };
+    $("tabGod").onclick = ()=>{
+        currentMode = "god";
+        renderAll();
+    };
+
+    $("modalBody").addEventListener("click", async (e)=>{
+        const btn = e.target.closest(".up-btn");
+        if(!btn) return;
+
+        const p = getPlayerCache();
+        if(!p || p.id == null){ setTip("请先登录", false); return; }
+
+        const skillId = toInt(btn.getAttribute("data-skill-id"));
+        if(skillId == null){ setTip("skillId 无效", false); return; }
+
+        btn.disabled = true;
+        const oldText = btn.textContent;
+        btn.textContent = "升级中";
+
+        try{
+            await doUpgrade(p.id, skillId);
+
+            const skills = await fetchSkills(p.id);
+            lastSkillsCache = skills;
+            skillIdNameMap = buildSkillIdNameMap(skills);
+
+            renderAll();
+
+            const up = await doUpdatePlayer(p.id);
+            if(up && up.data){
+                renderPlayer(up.data);
+                setPlayerCache(up.data);
+            }
+
+            setTip("升级成功", true);
+        }catch(err){
+            setTip(String(err.message || err), false);
+            renderAll();
+        }finally{
+            // renderAll 会重建按钮 DOM，这里不强行恢复旧按钮
+        }
+    });
+
+    $("openSkillBtn").onclick = async ()=>{
+        const p = getPlayerCache();
+        if(!p || p.id == null){
+            setTip("请先登录", false);
+            return;
+        }
+
+        setTip("", true);
+        $("modalBody").innerHTML = `<div class="hint">加载中...</div>`;
+        openModal();
+
+        try{
+            const playerId = p.id;
+
+            const [skills, slots] = await Promise.all([
+                fetchSkills(playerId),
+                fetchSlots(playerId)
+            ]);
+
+            lastSkillsCache = skills;
+            lastSlotsCache = slots;
+            skillIdNameMap = buildSkillIdNameMap(skills);
+
+            renderAll();
+        }catch(err){
+            $("modalBody").innerHTML =
+                `<div class="hint">加载失败：<code>${escapeHtml(String(err.message || err))}</code></div>`;
+        }
+    };
+
+    /* 注册 */
+    $("registerBtn").onclick = async ()=>{
+        const userName=$("userName").value.trim();
+        const password=$("password").value;
+        if(!userName||!password){ setTip("不能为空",false); return; }
+        const r=await postJson(API.register,{userName,password});
+        if(r.code===1) setTip("注册成功",true);
+        else setTip(r.msg,false);
+    };
+
+    /* 登录 */
+    $("loginBtn").onclick = async ()=>{
+        const userName=$("userName").value.trim();
+        const password=$("password").value;
+        if(!userName||!password){ setTip("不能为空",false); return; }
+
+        const r=await postJson(API.login,{userName,password});
+        if(r.code===1){
+            setTip("登录成功",true);
+            renderPlayer(r.data);
+            setPlayerCache(r.data);
+        }else{
+            setTip(r.msg,false);
+            renderPlayer(null);
+            localStorage.removeItem("player");
+        }
+    };
+
+    /* 刷新恢复显示 */
+    const cache = getPlayerCache();
+    if(cache) renderPlayer(cache);
+
+    /* =========================
+       ✅ 新增：战斗列表逻辑
+       ========================= */
+
+    function openEnemyPanel(){
+        $("enemyPanel").style.display = "block";
+    }
+    function closeEnemyPanel(){
+        $("enemyPanel").style.display = "none";
+        $("enemyPanelBody").innerHTML = "";
+    }
+    function openFightPanel(enemy){
+        // 关闭列表面板也行（更干净），你要两边都留着也行；这里按“战斗按钮点开后显示战斗页面”来做：显示战斗面板
+        $("fightPanel").style.display = "block";
+        $("fightTitle").textContent = `战斗：${enemy.name} lv${enemy.enemyLv}`;
+        $("fightBody").innerHTML = `
+            <div class="fight-placeholder">
+                <div style="font-weight:900;margin-bottom:8px;">${escapeHtml(enemy.name)} lv${escapeHtml(enemy.enemyLv)}</div>
+                这是战斗页面（占屏幕宽度约 1/4，贴右侧边缘），目前不绑定 API。<br>
+                之后接战斗接口时，我们把“选择技能 / 结算 / 日志”都塞进这里。
+            </div>
+        `;
+    }
+    function closeFightPanel(){
+        $("fightPanel").style.display = "none";
+        $("fightBody").innerHTML = "";
+    }
+
+    $("enemyFloatBtn").onclick = async ()=>{
+        // 打开面板 + 拉取敌人列表
+        openEnemyPanel();
+        $("enemyPanelBody").innerHTML = `<div class="hint">加载中...</div>`;
+
+        try{
+            const r = await getJson(API.showEnemy);  // Result: {code,msg,data}
+            if(r && r.code === 1){
+                const list = Array.isArray(r.data) ? r.data : [];
+                if(list.length === 0){
+                    $("enemyPanelBody").innerHTML = `<div class="hint">暂无怪物</div>`;
+                    return;
+                }
+
+                // 渲染：名称 + 等级，右侧“战斗”按钮（不绑定 API，只打开战斗页面）
+                const html = list.map(e=>{
+                    const name = e.name ?? "";
+                    const lv = e.enemyLv ?? "";
+                    const id = e.id ?? "";
+                    return `
+                        <div class="enemy-row" data-enemy-id="${escapeHtml(id)}"
+                             data-enemy-name="${escapeHtml(name)}"
+                             data-enemy-lv="${escapeHtml(lv)}">
+                            <div class="label">${escapeHtml(name)} lv${escapeHtml(lv)}</div>
+                            <button class="fight-btn">战斗</button>
+                        </div>
+                    `;
+                }).join("");
+
+                $("enemyPanelBody").innerHTML = html;
+            }else{
+                $("enemyPanelBody").innerHTML = `<div class="hint">加载失败：<code>${escapeHtml((r && r.msg) ? r.msg : "unknown")}</code></div>`;
+            }
+        }catch(err){
+            $("enemyPanelBody").innerHTML = `<div class="hint">加载失败：<code>${escapeHtml(String(err.message || err))}</code></div>`;
+        }
+    };
+
+    $("enemyPanelClose").onclick = closeEnemyPanel;
+
+    $("enemyPanelBody").addEventListener("click", (e)=>{
+        const btn = e.target.closest(".fight-btn");
+        if(!btn) return;
+
+        const row = e.target.closest(".enemy-row");
+        if(!row) return;
+
+        const enemy = {
+            id: row.getAttribute("data-enemy-id"),
+            name: row.getAttribute("data-enemy-name"),
+            enemyLv: row.getAttribute("data-enemy-lv")
+        };
+
+        // 不绑定 API，只打开战斗面板
+        openFightPanel(enemy);
+    });
+
+    $("fightBack").onclick = ()=>{
+        closeFightPanel();
+        // 返回后你要不要自动回到怪物列表？这里不强制，你可以按需要打开：
+        // openEnemyPanel();
+    };
+</script>
+
+</body>
+</html>

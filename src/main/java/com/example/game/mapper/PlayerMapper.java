@@ -19,7 +19,7 @@ public interface PlayerMapper {
     @Insert("insert ignore into player (username, password) values (#{userName},#{password})")
     Integer register(RegisterReq registerReq);
 
-    @Select("select * from player where username = #{userName} && password = #{password}")
+    @Select("select * from player where username = #{userName} and password = #{password}")
     Player login(LoginReq loginReq);
 
     @Insert("insert ignore into skill_lv (player_id, skill_id, lv) SELECT #{playerId},id,0 from skill_define")

@@ -16,10 +16,10 @@ import java.util.List;
 public class SkillServiceImpl implements SkillService {
 
 
-    private SkillMapper skillMapper;
-    private PlayerMapper playerMapper;
+    private final SkillMapper skillMapper;
+    private final PlayerMapper playerMapper;
     @Autowired
-    public void SkillService(SkillMapper skillMapper,PlayerMapper playerMapper){
+    public  SkillServiceImpl(SkillMapper skillMapper,PlayerMapper playerMapper){
         this.skillMapper=skillMapper;
         this.playerMapper=playerMapper;
     }
