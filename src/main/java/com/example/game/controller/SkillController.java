@@ -1,5 +1,6 @@
 package com.example.game.controller;
 
+import com.example.game.controller.dto.EquipSkillReq;
 import com.example.game.controller.dto.ShowReq;
 import com.example.game.controller.dto.UpgradeReq;
 import com.example.game.pojo.Result;
@@ -28,5 +29,10 @@ public class SkillController {
     @PostMapping("players/skills/upgrade")
     public Result upgrade(@RequestBody UpgradeReq upgradeReq){
         return skillService.upgrade(upgradeReq);
+    }
+
+    @PostMapping("players/skills/equip")
+    public Result equipSkill(@RequestBody EquipSkillReq equipSkillReq){
+        return skillService.equipSkill(equipSkillReq);
     }
 }

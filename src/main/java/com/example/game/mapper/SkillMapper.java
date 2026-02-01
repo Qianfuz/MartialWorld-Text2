@@ -1,5 +1,6 @@
 package com.example.game.mapper;
 
+import com.example.game.controller.dto.EquipSkillReq;
 import com.example.game.controller.dto.RegisterReq;
 import com.example.game.controller.dto.ShowReq;
 import com.example.game.controller.dto.UpgradeReq;
@@ -27,4 +28,7 @@ public interface SkillMapper {
 
     @Update("update skill_lv set lv = lv + 1 where skill_id = #{skillId} and player_id = #{playerId};")
     void upgrade(UpgradeReq upgradeReq);
+
+    @Update("update skill_equip set skill_id = #{skillId} where player_id = #{playerId} and slot_index = #{slotIndex};")
+    void equipSkill(EquipSkillReq equipSkillReq);
 }

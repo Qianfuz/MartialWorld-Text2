@@ -1,5 +1,6 @@
 package com.example.game.service.impl;
 
+import com.example.game.controller.dto.EquipSkillReq;
 import com.example.game.controller.dto.ShowReq;
 import com.example.game.controller.dto.UpgradeReq;
 import com.example.game.mapper.PlayerMapper;
@@ -62,5 +63,11 @@ public class SkillServiceImpl implements SkillService {
             return Result.error("升级失败");
         }
 
+    }
+
+    @Override
+    public Result equipSkill(EquipSkillReq equipSkillReq) {
+        skillMapper.equipSkill(equipSkillReq);
+        return Result.success("装备成功");
     }
 }
