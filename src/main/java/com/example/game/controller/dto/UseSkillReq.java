@@ -1,11 +1,10 @@
 package com.example.game.controller.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
-public class UpgradeReq {
+public class UseSkillReq {
     private Integer playerId;
     private Integer skillId;
+
 }

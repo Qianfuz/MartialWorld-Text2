@@ -12,8 +12,21 @@ import java.util.List;
 public class Fight {
     private Integer curPlayerHp;
     private Integer curPlayerMp;
+    private String playerName;
+    private Integer playerLv;
+    private Integer playerHpMax;
+    private Integer playerMpMax;
+
     private Integer curEnemyHp;
+    private String enemyName;
+    private Integer enemyLv;
+    private Integer enemyHpMax;
+    private Integer enemyId;
 
 
-    //private List<String> log=new ArrayList<>();
+    private List<String> log=new ArrayList<>();
+
+    public List<String> getList(){
+        return log;
+    }
 }
