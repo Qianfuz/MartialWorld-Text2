@@ -3,6 +3,7 @@ package com.example.game.mapper;
 import com.example.game.controller.dto.LoginReq;
 import com.example.game.controller.dto.RegisterReq;
 import com.example.game.controller.dto.ShowReq;
+import com.example.game.pojo.Fight;
 import com.example.game.pojo.Player;
 import com.example.game.pojo.PlayerSkill;
 import com.example.game.pojo.PlayerSkillSlot;

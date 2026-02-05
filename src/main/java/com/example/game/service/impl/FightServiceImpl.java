@@ -2,6 +2,7 @@ package com.example.game.service.impl;
 
 
 import com.example.game.controller.dto.FightReq;
+import com.example.game.controller.dto.RewardReq;
 import com.example.game.controller.dto.UpgradeReq;
 import com.example.game.controller.dto.UseSkillReq;
 import com.example.game.mapper.EnemyMapper;
@@ -74,7 +75,7 @@ public class FightServiceImpl implements FightService {
 
         if(fight.getCurEnemyHp()-playerAtk<=0){
             fight.setCurEnemyHp(0);
-            fight.getList().add(sb.toString());
+            fight.getLog().add(sb.toString());
             return Result.success(fight);
         }
         fight.setCurEnemyHp(fight.getCurEnemyHp()-playerAtk);
@@ -88,7 +89,7 @@ public class FightServiceImpl implements FightService {
             sb.append("[").append(fight.getEnemyName()).append("] ")
                     .append("使用 ").append("[").append(enemySkill.getName()).append("] ")
                     .append("造成了 ").append(enemyAtk).append(" 点 伤害").append("\n");
-            fight.getList().add(sb.toString());
+            fight.getLog().add(sb.toString());
             fight.setCurPlayerHp(fight.getCurPlayerHp()-enemyAtk);
             if(fight.getCurPlayerHp()<0){
                 fight.setCurPlayerHp(0);
@@ -97,7 +98,7 @@ public class FightServiceImpl implements FightService {
             sb.append("[").append(fight.getEnemyName()).append("] ")
                     .append("使用 ").append("[").append(enemySkill.getName()).append("] ")
                     .append("恢复了 ").append(-enemyAtk).append(" 点 生命值").append("\n");
-            fight.getList().add(sb.toString());
+            fight.getLog().add(sb.toString());
             fight.setCurEnemyHp(fight.getCurEnemyHp()-enemyAtk);
             if(fight.getCurEnemyHp()>fight.getEnemyHpMax()){
                 fight.setCurEnemyHp(fight.getEnemyHpMax());
@@ -107,6 +108,22 @@ public class FightServiceImpl implements FightService {
         return Result.success(fight);
     }
 
+    @Override
+    public Result reward(RewardReq rewardReq) {
+        Player player = playerMapper.getPlayer(rewardReq.getPlayerId());
+        Fight fight = fightMap.getFightConcurrentHashMap().get(rewardReq.getPlayerId());
+        Integer rewardExp = fight.getEnemyLv()*10+50;
+        Integer rewardMoney = fight.getEnemyLv()*13+71;
+        player.setMoney(player.getMoney()+rewardMoney);
+        player.setExp(player.getExp()+rewardExp);
+        while (player.getExp()>=player.getExpMax()){
+            player.setExp(player.getExp()-player.getExpMax());
+            player.setExpMax(player.getExpMax()*21/20);
+            player.setLv(player.getLv()+1);
+        }
+        playerMapper.updatePlayer(player);
+        return Result.success();
+    }
 
 
 }

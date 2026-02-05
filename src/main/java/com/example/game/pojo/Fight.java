@@ -26,7 +26,4 @@ public class Fight {
 
     private List<String> log=new ArrayList<>();
 
-    public List<String> getList(){
-        return log;
-    }
 }
