@@ -41,7 +41,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public Result updatePlayer(UpdatePlayerReq updatePlayerReq) {
-        return Result.success(playerMapper.getPlayer(updatePlayerReq.playerId));
+        return Result.success(playerMapper.getPlayer(updatePlayerReq.getPlayerId()));
     }
 
 

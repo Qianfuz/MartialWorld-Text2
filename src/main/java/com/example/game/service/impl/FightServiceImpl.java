@@ -10,6 +10,7 @@ import com.example.game.mapper.PlayerMapper;
 import com.example.game.mapper.SkillMapper;
 import com.example.game.pojo.*;
 import com.example.game.service.FightService;
+import com.example.game.util.FightUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -61,8 +62,8 @@ public class FightServiceImpl implements FightService {
         PlayerSkill playerSkill = skillMapper.getSkill(new UpgradeReq(useSkillReq.getPlayerId(),useSkillReq.getSkillId()));
         Fight fight = fightMap.getFightConcurrentHashMap().get(useSkillReq.getPlayerId());
         StringBuilder sb = new StringBuilder();
-        Integer playerAtk = playerSkill.getBasicAtk() * (20 + playerSkill.getLv() *3 ) / 20;
-        Integer playerMpCost = playerSkill.getBasicMpCost() * (20 + playerSkill.getLv() * 3) / 20;
+        Integer playerAtk = FightUtil.playerAtk(playerSkill.getBasicAtk(), playerSkill.getLv());
+        Integer playerMpCost = FightUtil.playerMpCost(playerSkill.getBasicMpCost(), playerSkill.getLv());
 
         if(fight.getCurPlayerMp()<playerMpCost){
             return Result.error("蓝量不足");
@@ -83,7 +84,7 @@ public class FightServiceImpl implements FightService {
         Random random = new Random();
         Integer index = random.nextInt(4)+1;
         EnemySkill enemySkill = enemyMapper.getEnemySkill(fight.getEnemyId(),index);
-        Integer enemyAtk = enemySkill.getBasicAtk()*(20 + fight.getEnemyLv())/20;
+        Integer enemyAtk = FightUtil.enemyAtk(enemySkill.getBasicAtk(),fight.getEnemyLv());
 
         if(enemyAtk>=0){
             sb.append("[").append(fight.getEnemyName()).append("] ")

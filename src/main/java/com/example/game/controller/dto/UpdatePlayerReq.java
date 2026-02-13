@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class UpdatePlayerReq {
-    public Integer playerId;
+    private Integer playerId;
 }

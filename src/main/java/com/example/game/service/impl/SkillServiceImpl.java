@@ -9,6 +9,7 @@ import com.example.game.pojo.Player;
 import com.example.game.pojo.PlayerSkill;
 import com.example.game.pojo.Result;
 import com.example.game.service.SkillService;
+import com.example.game.util.FightUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,15 +31,9 @@ public class SkillServiceImpl implements SkillService {
     public Result show(ShowReq showReq) {
         List<PlayerSkill> playerSkillList = skillMapper.show(showReq);
         for (int i = 0; i < playerSkillList.size(); i++) {
-            if(playerSkillList.get(i).getLv()==0){
-                playerSkillList.get(i).setCurATK(playerSkillList.get(i).getBasicAtk());
-                playerSkillList.get(i).setCurMpCost(playerSkillList.get(i).getBasicMpCost());
-                playerSkillList.get(i).setCurUpgradeCost(playerSkillList.get(i).getUpgradeCost());
-            } else {
-                playerSkillList.get(i).setCurATK(playerSkillList.get(i).getBasicAtk()*(20+playerSkillList.get(i).getLv()*3)/20);
-                playerSkillList.get(i).setCurMpCost(playerSkillList.get(i).getBasicMpCost()*(20+playerSkillList.get(i).getLv()*3)/20);
-                playerSkillList.get(i).setCurUpgradeCost(playerSkillList.get(i).getUpgradeCost()*(20+playerSkillList.get(i).getLv()*3)/20);
-            }
+            playerSkillList.get(i).setCurATK(FightUtil.playerAtk(playerSkillList.get(i).getBasicAtk(),playerSkillList.get(i).getLv()));
+            playerSkillList.get(i).setCurMpCost(FightUtil.playerMpCost(playerSkillList.get(i).getBasicMpCost(),playerSkillList.get(i).getLv()));
+            playerSkillList.get(i).setCurUpgradeCost(FightUtil.skillUpgradeCost(playerSkillList.get(i).getUpgradeCost(),playerSkillList.get(i).getLv()));
         }
         return Result.success(playerSkillList);
     }
@@ -54,8 +49,9 @@ public class SkillServiceImpl implements SkillService {
     public Result upgrade(UpgradeReq upgradeReq) {
         Player p = playerMapper.getPlayer(upgradeReq.getPlayerId());
         PlayerSkill ps = skillMapper.getSkill(upgradeReq);
-        if(p.getMoney()>=ps.getUpgradeCost()*(20+ps.getLv()*3)/20 && p.getLv()>=ps.getLimitedLv()){
-            p.setMoney(p.getMoney()-ps.getUpgradeCost()*(20+ps.getLv()*3)/20);
+        Integer curSkillUpgradeCost=FightUtil.skillUpgradeCost(ps.getUpgradeCost(),ps.getLv());
+        if(p.getMoney()>=curSkillUpgradeCost && p.getLv()>=ps.getLimitedLv()){
+            p.setMoney(p.getMoney()-curSkillUpgradeCost);
             skillMapper.upgrade(upgradeReq);
             playerMapper.updatePlayer(p);
             return Result.success("升级成功");
