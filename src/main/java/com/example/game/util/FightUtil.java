@@ -17,4 +17,13 @@ public class FightUtil {
     public static int enemyAtk(int basicAtk,int lv){
         return basicAtk*(20+lv)/20;
     }
+
+    public static int rewardExp(int enemyLv){
+        return enemyLv*10+50;
+    }
+
+    public static int rewardMoney(int enemyLv){
+        return enemyLv*13+71;
+    }
+
 }

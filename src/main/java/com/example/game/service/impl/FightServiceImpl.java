@@ -113,15 +113,17 @@ public class FightServiceImpl implements FightService {
     public Result reward(RewardReq rewardReq) {
         Player player = playerMapper.getPlayer(rewardReq.getPlayerId());
         Fight fight = fightMap.getFightConcurrentHashMap().get(rewardReq.getPlayerId());
-        Integer rewardExp = fight.getEnemyLv()*10+50;
-        Integer rewardMoney = fight.getEnemyLv()*13+71;
+        Integer rewardExp = FightUtil.rewardExp(fight.getEnemyLv());
+        Integer rewardMoney = FightUtil.rewardMoney(fight.getEnemyLv());
         player.setMoney(player.getMoney()+rewardMoney);
         player.setExp(player.getExp()+rewardExp);
+        //升级
         while (player.getExp()>=player.getExpMax()){
             player.setExp(player.getExp()-player.getExpMax());
             player.setExpMax(player.getExpMax()*21/20);
             player.setLv(player.getLv()+1);
         }
+        //
         playerMapper.updatePlayer(player);
         return Result.success();
     }
