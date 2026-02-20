@@ -122,6 +122,8 @@ public class FightServiceImpl implements FightService {
             player.setExp(player.getExp()-player.getExpMax());
             player.setExpMax(player.getExpMax()*21/20);
             player.setLv(player.getLv()+1);
+            player.setHp(FightUtil.nextLvHp(player.getHp()));
+            player.setMp(FightUtil.nextLvMp(player.getMp()));
         }
         //
         playerMapper.updatePlayer(player);

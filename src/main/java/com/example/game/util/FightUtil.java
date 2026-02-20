@@ -26,4 +26,12 @@ public class FightUtil {
         return enemyLv*13+71;
     }
 
+    public static int nextLvHp(int curHp){
+        return curHp*23/20;
+    }
+
+    public static int nextLvMp(int curMp){
+        return curMp*23/20;
+    }
+
 }

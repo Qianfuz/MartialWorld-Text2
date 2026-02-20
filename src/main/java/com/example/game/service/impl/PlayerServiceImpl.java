@@ -16,8 +16,13 @@ import java.util.List;
 @Service
 public class PlayerServiceImpl implements PlayerService {
 
-    @Autowired
+
     private PlayerMapper playerMapper;
+
+    @Autowired
+    public PlayerServiceImpl(PlayerMapper playerMapper){
+        this.playerMapper=playerMapper;
+    }
 
     @Override
     public Integer register(RegisterReq registerReq) {
