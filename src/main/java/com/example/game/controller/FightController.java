@@ -21,17 +21,17 @@ public class FightController {
     }
 
 
-    @PostMapping("initfight")
+    @PostMapping("/initfight")
     public Result initFight(@RequestBody FightReq fightReq){
         return fightService.initFight(fightReq);
     }
 
-    @PostMapping("useskill")
+    @PostMapping("/useskill")
     public Result useSkill(@RequestBody UseSkillReq useSkillReq){
         return fightService.useSkill(useSkillReq);
     }
 
-    @PostMapping("reward")
+    @PostMapping("/reward")
     public Result reward(@RequestBody RewardReq rewardReq){
         return fightService.reward(rewardReq);
     }

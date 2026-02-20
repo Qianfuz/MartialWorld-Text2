@@ -18,7 +18,7 @@ public class EnemyController {
         this.enemyService=enemyService;
     }
 
-    @GetMapping("enemys/showenemy")
+    @GetMapping("/enemys/showenemy")
     public Result showEnemy(){
         return enemyService.showEnemy();
     }

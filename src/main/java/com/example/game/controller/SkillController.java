@@ -26,12 +26,12 @@ public class SkillController {
         return skillService.showSlot(showReq);
     }
 
-    @PostMapping("players/skills/upgrade")
+    @PostMapping("/players/skills/upgrade")
     public Result upgrade(@RequestBody UpgradeReq upgradeReq){
         return skillService.upgrade(upgradeReq);
     }
 
-    @PostMapping("players/skills/equip")
+    @PostMapping("/players/skills/equip")
     public Result equipSkill(@RequestBody EquipSkillReq equipSkillReq){
         return skillService.equipSkill(equipSkillReq);
     }

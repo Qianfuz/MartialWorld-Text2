@@ -31,7 +31,7 @@ public class PlayerController {
         return playerService.login(loginReq);
     }
 
-    @PostMapping("players/update")
+    @PostMapping("/players/update")
     public Result updatePlayer(@RequestBody UpdatePlayerReq updatePlayerReq){
         return playerService.updatePlayer(updatePlayerReq);
     }
