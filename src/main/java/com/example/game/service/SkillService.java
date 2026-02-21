@@ -7,7 +7,7 @@ import com.example.game.pojo.Result;
 
 public interface SkillService {
 
-    Result show(ShowReq showReq);
+    Result showSkill(ShowReq showReq);
 
     Result showSlot(ShowReq showReq);
 

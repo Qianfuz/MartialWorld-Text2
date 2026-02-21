@@ -17,8 +17,8 @@ public class SkillController {
     private SkillService skillService;
 
     @PostMapping("/players/skills/showskill")
-    public Result show(@RequestBody ShowReq showReq){
-        return skillService.show(showReq);
+    public Result showSkill(@RequestBody ShowReq showReq){
+        return skillService.showSkill(showReq);
     }
 
     @PostMapping("/players/skills/showslot")

@@ -7,12 +7,11 @@ import com.example.game.pojo.Result;
 
 
 public interface PlayerService {
-    Integer register(RegisterReq registerReq);
+    Result register(RegisterReq registerReq);
 
     Result login(LoginReq loginReq);
 
     void init(RegisterReq registerReq);
-
 
     Result updatePlayer(UpdatePlayerReq updatePlayerReq);
 }

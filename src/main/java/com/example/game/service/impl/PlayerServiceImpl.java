@@ -25,8 +25,14 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public Integer register(RegisterReq registerReq) {
-        return playerMapper.register(registerReq);
+    public Result register(RegisterReq registerReq) {
+        //return playerMapper.register(registerReq);
+        if(playerMapper.register(registerReq)>0){
+            init(registerReq);
+            return Result.success();
+        } else {
+            return Result.error("注册失败");
+        }
     }
 
     @Override
@@ -34,14 +40,19 @@ public class PlayerServiceImpl implements PlayerService {
         if(playerMapper.login(loginReq)==null){
             return Result.error("用户名或密码错误");
         } else {
+            RegisterReq registerReq = new RegisterReq();
+            registerReq.setUserName(loginReq.getUserName());
+            registerReq.setPassword(loginReq.getPassword());
+            init(registerReq);
             return Result.success(playerMapper.login(loginReq));
         }
     }
 
     @Override
     public void init(RegisterReq registerReq){
-        playerMapper.init1(playerMapper.getPlayerId(registerReq));
-        playerMapper.init2(playerMapper.getPlayerId(registerReq));
+        playerMapper.initSkillLv(playerMapper.getPlayerId(registerReq));
+        playerMapper.initSkillSlot(playerMapper.getPlayerId(registerReq));
+        playerMapper.initMedicineNumber(playerMapper.getPlayerId(registerReq));
     }
 
     @Override

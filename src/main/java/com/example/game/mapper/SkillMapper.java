@@ -18,7 +18,7 @@ public interface SkillMapper {
 
 
     @Select("select id, skill_name, limited_lv, upgrade_cost, basic_atk, basic_mp_cost, type ,sl.lv from skill_define sd join skill_lv sl on sd.id = sl.skill_id where player_id = #{playerId};")
-    List<PlayerSkill> show(ShowReq showReq);
+    List<PlayerSkill> showSkill(ShowReq showReq);
 
     @Select("select player_id, slot_index, skill_id from skill_equip where player_id = #{playerId}")
     List<PlayerSkillSlot> showSlot(ShowReq showReq);

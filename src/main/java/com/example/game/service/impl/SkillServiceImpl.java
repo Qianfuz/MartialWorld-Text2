@@ -28,8 +28,8 @@ public class SkillServiceImpl implements SkillService {
 
 
     @Override
-    public Result show(ShowReq showReq) {
-        List<PlayerSkill> playerSkillList = skillMapper.show(showReq);
+    public Result showSkill(ShowReq showReq) {
+        List<PlayerSkill> playerSkillList = skillMapper.showSkill(showReq);
         for (int i = 0; i < playerSkillList.size(); i++) {
             playerSkillList.get(i).setCurATK(FightUtil.playerAtk(playerSkillList.get(i).getBasicAtk(),playerSkillList.get(i).getLv()));
             playerSkillList.get(i).setCurMpCost(FightUtil.playerMpCost(playerSkillList.get(i).getBasicMpCost(),playerSkillList.get(i).getLv()));
