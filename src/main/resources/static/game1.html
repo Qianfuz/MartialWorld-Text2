@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Game · 背包扩展</title>
+    <title>Game</title>
     <style>
         body{margin:0;background:#0b0b0b;color:#fff;font-family:Arial,"Microsoft YaHei",sans-serif;}
 
@@ -75,32 +75,6 @@
             box-sizing:border-box;
         }
         .skill-btn button{
-            width:100%;
-            height:32px;
-            border-radius:10px;
-            border:1px solid rgba(255,255,255,.25);
-            background:#fff;
-            color:#111;
-            font-weight:900;
-            font-size:12px;
-            cursor:pointer;
-        }
-
-        /* ========= 新增：背包按钮，紧挨技能下方 ========= */
-        .bag-btn-wrap{
-            position:fixed;
-            top:250px;          /* 190 + 52(技能区块高度) + 8间距 ≈ 250 */
-            left:12px;
-            width:184px;
-            padding:10px 12px;
-            background:#121212;
-            border:1px solid rgba(255,255,255,.15);
-            border-radius:12px;
-            z-index:998;
-            display:none;
-            box-sizing:border-box;
-        }
-        .bag-btn-wrap button{
             width:100%;
             height:32px;
             border-radius:10px;
@@ -185,7 +159,7 @@
             padding:12px 14px 14px;
         }
 
-        /* 装备槽（8个框） */
+        /* 装备槽（8个框）- 不显示数字，只按顺序摆 */
         .slot-wrap{
             display:flex;
             gap:10px;
@@ -211,9 +185,12 @@
             white-space:nowrap;
             padding:0 10px;
         }
-        .slot.empty{opacity:.75;font-weight:800;}
+        .slot.empty{
+            opacity:.75;
+            font-weight:800;
+        }
 
-        /* 通用表格 */
+        /* 表格 */
         table{
             width:100%;
             border-collapse:collapse;
@@ -230,8 +207,11 @@
             background:rgba(255,255,255,.06);
             font-weight:900;
         }
-        tbody tr:hover{background:rgba(255,255,255,.04);}
+        tbody tr:hover{
+            background:rgba(255,255,255,.04);
+        }
 
+        /* 神技：小一点 */
         .small table{font-size:11px;}
         .small th,.small td{padding:6px 8px;}
 
@@ -248,7 +228,7 @@
             border:1px solid rgba(255,255,255,.12);
         }
 
-        /* 升级/装备按钮 */
+        /* 升级按钮样式 */
         .up-btn{
             height:26px;
             padding:0 10px;
@@ -261,11 +241,24 @@
             cursor:pointer;
             white-space:nowrap;
         }
-        .up-btn:disabled{opacity:.5;cursor:not-allowed;}
+        .up-btn:disabled{
+            opacity:.5;
+            cursor:not-allowed;
+        }
 
-        .skill-table th, .skill-table td{padding:6px 6px;}
-        .skill-table td:first-child,.skill-table th:first-child{text-align:left;padding-left:6px;}
+        /* =========================
+           ✅（仅修改技能展示模块）表格更"向左压缩"
+           ========================= */
+        .skill-table th, .skill-table td{
+            padding:6px 6px;              /* 更窄 */
+        }
+        .skill-table td:first-child,
+        .skill-table th:first-child{
+            text-align:left;              /* name 更靠左 */
+            padding-left:6px;
+        }
 
+        /* ✅（仅技能展示模块）装备下拉 + 按钮 */
         .equip-select{
             height:26px;
             border-radius:10px;
@@ -290,9 +283,15 @@
             white-space:nowrap;
             margin-left:6px;
         }
-        .equip-btn:disabled{opacity:.5;cursor:not-allowed;}
+        .equip-btn:disabled{
+            opacity:.5;
+            cursor:not-allowed;
+        }
 
-        /* 战斗列表右侧 */
+        /* =========================
+           战斗列表 UI（右侧）
+           ========================= */
+
         .enemy-float-btn{
             position:fixed;
             right:12px;
@@ -319,11 +318,12 @@
             letter-spacing:2px;
             opacity:.95;
         }
+
         .enemy-panel{
             position:fixed;
             right:12px;
-            top:70px;
-            bottom:70px;
+            top:70px;          /* 给右上角登录框留空间 */
+            bottom:70px;       /* 下方也留空 */
             width:min(25vw, 360px);
             min-width:260px;
             background:#121212;
@@ -362,6 +362,7 @@
             height:calc(100% - 48px);
             overflow:auto;
         }
+
         .enemy-row{
             display:flex;
             align-items:center;
@@ -393,12 +394,15 @@
             white-space:nowrap;
         }
 
-        /* 战斗全屏界面 */
+        /* =========================
+           ✅ 近全屏战斗页面（留下登录框那一行高度）
+           ========================= */
+
         .battle-screen{
             position:fixed;
             left:12px;
             right:12px;
-            top:70px;
+            top:70px;     /* 留出注册登录那一行高度 */
             bottom:12px;
             background:#121212;
             border:1px solid rgba(255,255,255,.15);
@@ -432,7 +436,12 @@
             font-size:12px;
             cursor:pointer;
         }
-        .battle-head .back:disabled{opacity:.5;cursor:not-allowed;}
+        .battle-head .back:disabled{
+            opacity:.5;
+            cursor:not-allowed;
+        }
+
+        /* ✅ 让战斗页面"上面信息 + 下面技能槽"分离；技能槽固定在底部 */
         .battle-body{
             padding:12px;
             height:calc(100% - 48px);
@@ -443,11 +452,14 @@
             gap:12px;
             overflow:hidden;
         }
+
+        /* ✅ 顶部信息区：玩家在左上角，怪物在右上角（小容器） */
         .battle-top{
             position:relative;
             flex:0 0 auto;
             min-height:120px;
         }
+
         .stat-box{
             display:inline-block;
             width:auto;
@@ -461,6 +473,7 @@
             line-height:1.7;
             vertical-align:top;
         }
+
         .battle-player-box{
             position:absolute;
             left:0;
@@ -472,17 +485,21 @@
             top:0;
             text-align:left;
         }
+
         .stat-box .line{
             font-weight:900;
             white-space:nowrap;
             overflow:hidden;
             text-overflow:ellipsis;
         }
+
+        /* ✅ 底部技能区：全部贴底；两行技能槽，中间高度放背包（靠右） */
         .battle-bottom{
             flex:0 0 auto;
             border-top:1px solid rgba(255,255,255,.10);
             padding-top:12px;
         }
+
         .battle-skill-row{
             display:grid;
             grid-template-columns:repeat(4, 1fr);
@@ -493,6 +510,7 @@
             justify-content:flex-end;
             margin:10px 0;
         }
+
         .bag-btn{
             height:30px;
             padding:0 12px;
@@ -504,6 +522,7 @@
             font-size:12px;
             cursor:pointer;
         }
+
         .skill-slot-btn{
             height:46px;
             border-radius:12px;
@@ -519,8 +538,18 @@
             padding:0 10px;
             text-align:center;
         }
-        .skill-slot-btn.empty{opacity:.75;font-weight:800;}
-        .skill-slot-btn:disabled{opacity:.5;cursor:not-allowed;}
+        .skill-slot-btn.empty{
+            opacity:.75;
+            font-weight:800;
+        }
+        .skill-slot-btn:disabled{
+            opacity:.5;
+            cursor:not-allowed;
+        }
+
+        /* =========================
+           ✅（仅插入：战斗log区域）
+           ========================= */
         .battle-log{
             flex:1 1 auto;
             display:flex;
@@ -547,9 +576,13 @@
             white-space:pre-wrap;
             word-break:break-word;
         }
-        .battle-log .log-empty{opacity:.7;}
+        .battle-log .log-empty{
+            opacity:.7;
+        }
 
-        /* 奖励弹窗 */
+        /* =========================
+           奖励信息弹窗
+           ========================= */
         .reward-modal{
             position:fixed;
             inset:0;
@@ -604,9 +637,19 @@
             padding:8px 0;
             border-bottom:1px solid rgba(255,255,255,.08);
         }
-        .reward-item:last-child{border-bottom:none;}
-        .reward-label{font-weight:900;font-size:13px;color:#fff;}
-        .reward-value{font-weight:900;font-size:13px;color:#9efc9e;}
+        .reward-item:last-child{
+            border-bottom:none;
+        }
+        .reward-label{
+            font-weight:900;
+            font-size:13px;
+            color:#fff;
+        }
+        .reward-value{
+            font-weight:900;
+            font-size:13px;
+            color:#9efc9e;
+        }
         .reward-total{
             margin-top:16px;
             padding-top:16px;
@@ -615,8 +658,16 @@
             align-items:center;
             justify-content:space-between;
         }
-        .reward-total .label{font-weight:900;font-size:14px;color:#fff;}
-        .reward-total .value{font-weight:900;font-size:14px;color:#9efc9e;}
+        .reward-total .label{
+            font-weight:900;
+            font-size:14px;
+            color:#fff;
+        }
+        .reward-total .value{
+            font-weight:900;
+            font-size:14px;
+            color:#9efc9e;
+        }
         .reward-continue-btn{
             margin-top:20px;
             width:100%;
@@ -629,15 +680,6 @@
             font-size:13px;
             cursor:pointer;
         }
-
-        /* ========= 背包弹窗 (复用modal样式, 单独id用于控制) ========= */
-        #bagModal .body{
-            min-height:300px;
-        }
-        /* 药品表格紧凑 */
-        .medicine-table th, .medicine-table td{
-            padding:8px 6px;
-        }
     </style>
 </head>
 <body>
@@ -648,11 +690,6 @@
     <button id="openSkillBtn">技能</button>
 </div>
 
-<!-- 新增：背包按钮，样式与技能完全一致，位于其下方 -->
-<div class="bag-btn-wrap" id="bagBtnWrap">
-    <button id="openBagBtn">背包</button>
-</div>
-
 <div class="top-right-form">
     <input id="userName" placeholder="用户名">
     <input id="password" type="password" placeholder="密码">
@@ -661,7 +698,6 @@
     <span class="mini-tip" id="tip"></span>
 </div>
 
-<!-- 技能弹窗 -->
 <div class="modal" id="skillModal">
     <div class="card">
         <div class="head">
@@ -676,29 +712,10 @@
     </div>
 </div>
 
-<!-- 新增：背包弹窗 (药品/装备/物品) -->
-<div class="modal" id="bagModal">
-    <div class="card">
-        <div class="head">
-            <div class="title">背包</div>
-            <div class="tabs">
-                <button class="tab-btn" id="bagTabEquip">装备</button>
-                <button class="tab-btn" id="bagTabMedicine">药品</button>
-                <button class="tab-btn" id="bagTabItem">物品</button>
-                <button class="close-btn" id="closeBagModal">关闭</button>
-            </div>
-        </div>
-        <div class="body" id="bagModalBody">
-            <!-- 默认物品页面(暂未实现) -->
-            <div class="hint" style="text-align:center; padding:40px 0;">👜 物品功能暂未开放</div>
-        </div>
-    </div>
-</div>
-
-<!-- 战斗列表按钮 -->
+<!-- 战斗列表按钮（右侧边缘中间） -->
 <div class="enemy-float-btn" id="enemyFloatBtn"><span>战斗列表</span></div>
 
-<!-- 怪物列表面板 -->
+<!-- 怪物列表面板（右侧） -->
 <div class="enemy-panel" id="enemyPanel">
     <div class="head">
         <div class="t">怪物列表</div>
@@ -707,36 +724,47 @@
     <div class="body" id="enemyPanelBody"></div>
 </div>
 
-<!-- 全屏战斗页面 -->
+<!-- ✅ 近全屏战斗页面（点击战斗按钮后展示） -->
 <div class="battle-screen" id="battleScreen">
     <div class="battle-head">
         <div class="t" id="battleTitle">战斗</div>
         <button class="back" id="battleBack">返回</button>
     </div>
+
     <div class="battle-body">
+        <!-- 顶部信息 -->
         <div class="battle-top">
             <div class="stat-box battle-player-box" id="battlePlayerBox"></div>
             <div class="stat-box battle-enemy-box" id="battleEnemyBox"></div>
         </div>
+
+        <!-- ✅ log区域：技能槽上方，屏幕中下方，居中 -->
         <div class="battle-log" id="battleLog"></div>
+
+        <!-- 底部技能 + 背包 -->
         <div class="battle-bottom">
             <div class="battle-skill-row" id="battleSkillRow1"></div>
+
+            <!-- 背包在两行技能槽的中间高度，靠右 -->
             <div class="battle-mid-row">
                 <button class="bag-btn" id="bagBtn">背包</button>
             </div>
+
             <div class="battle-skill-row" id="battleSkillRow2"></div>
         </div>
     </div>
 </div>
 
-<!-- 奖励弹窗 -->
+<!-- ✅ 奖励信息弹窗 -->
 <div class="reward-modal" id="rewardModal">
     <div class="card">
         <div class="head">
             <div class="title">战斗胜利奖励</div>
             <button class="close-reward-btn" id="closeRewardBtn">关闭</button>
         </div>
-        <div class="body" id="rewardModalBody"></div>
+        <div class="body" id="rewardModalBody">
+            <!-- 奖励内容会动态填充 -->
+        </div>
     </div>
 </div>
 
@@ -752,9 +780,8 @@
         initFight: "/initfight",
         equipSkill: "/players/skills/equip",
         useSkill: "/useskill",
-        reward: "/reward",
-        /* 新增：查看药品接口 */
-        showMedicine: "/players/showmedicine"
+        /* ✅ 新增：奖励接口 */
+        reward: "/reward"
     };
 
     const $ = (id) => document.getElementById(id);
@@ -768,16 +795,13 @@
     function renderPlayer(p){
         const box = $("playerPanel");
         const skillWrap = $("skillBtnWrap");
-        const bagWrap = $("bagBtnWrap");      // 新增
         if(!p){
             box.style.display="none";
             skillWrap.style.display="none";
-            if(bagWrap) bagWrap.style.display="none";
             return;
         }
         box.style.display="block";
         skillWrap.style.display="block";
-        if(bagWrap) bagWrap.style.display="block";
         box.innerHTML =
             `<b>${escapeHtml(p.userName)}</b><br>` +
             `Lv: ${escapeHtml(p.lv)}<br>` +
@@ -903,6 +927,12 @@
             .replaceAll('"',"&quot;")
             .replaceAll("'","&#39;");
     }
+
+    /* =========================
+       ✅（仅修改技能展示模块）
+       每行末尾：下拉(1-8) + 装备按钮
+       装备按钮禁用条件：lv==0 或 未选择槽位
+       ========================= */
 
     function buildSlotOptions(){
         let opts = `<option value="">槽位</option>`;
@@ -1053,7 +1083,7 @@
 
     async function doInitFight(playerId, enemyId, enemyLv){
         const r = await postJson(API.initFight, { playerId, enemyId, enemyLv });
-        if(r && r.code === 1) return r.data;
+        if(r && r.code === 1) return r.data; // Fight（完整）
         throw new Error((r && r.msg) ? r.msg : "初始化战斗失败");
     }
 
@@ -1063,49 +1093,20 @@
         throw new Error((r && r.msg) ? r.msg : "装备失败");
     }
 
+    /* ✅ 新增：UseSkillReq {playerId, skillId} */
     async function doUseSkill(playerId, skillId){
         const r = await postJson(API.useSkill, { playerId, skillId });
-        if(r && r.code === 1) return r.data;
+        if(r && r.code === 1) return r.data; // Fight（完整）
         throw new Error((r && r.msg) ? r.msg : "使用技能失败");
     }
 
+    /* ✅ 新增：调用奖励接口 */
     async function doReward(playerId){
         const r = await postJson(API.reward, { playerId });
-        if(r && r.code === 1) return r.data;
+        if(r && r.code === 1) return r.data; // 返回奖励信息
         throw new Error((r && r.msg) ? r.msg : "获取奖励失败");
     }
 
-    /* ========= 新增：查看药品 ========= */
-    async function doShowMedicine(playerId){
-        const r = await postJson(API.showMedicine, { playerId });
-        if(r && r.code === 1) return Array.isArray(r.data) ? r.data : [];
-        throw new Error((r && r.msg) ? r.msg : "查询药品失败");
-    }
-
-    /* 渲染药品表格 */
-    function renderMedicineTable(medicines){
-        if(!medicines.length){
-            return `<div class="hint" style="text-align:center;">暂无药品</div>`;
-        }
-        const rows = medicines.map(m => {
-            const name = m.name ?? '未知';
-            const hp = m.restoreHp ?? 0;
-            const mp = m.restoreMp ?? 0;
-            const num = m.number ?? 0;
-            return `<tr>
-                <td>${escapeHtml(name)}</td>
-                <td>${escapeHtml(hp)}</td>
-                <td>${escapeHtml(mp)}</td>
-                <td>${escapeHtml(num)}</td>
-            </tr>`;
-        }).join('');
-        return `<table class="medicine-table">
-            <thead><tr><th>名称</th><th>恢复血量</th><th>恢复蓝量</th><th>拥有个数</th></tr></thead>
-            <tbody>${rows}</tbody>
-        </table>`;
-    }
-
-    // 技能相关变量
     let currentMode = "normal";
     let lastSkillsCache = null;
     let lastSlotsCache = null;
@@ -1267,7 +1268,7 @@
         }
     };
 
-    // 注册登录
+    /* 注册 */
     $("registerBtn").onclick = async ()=>{
         const userName=$("userName").value.trim();
         const password=$("password").value;
@@ -1277,6 +1278,7 @@
         else setTip(r.msg,false);
     };
 
+    /* 登录 */
     $("loginBtn").onclick = async ()=>{
         const userName=$("userName").value.trim();
         const password=$("password").value;
@@ -1294,78 +1296,14 @@
         }
     };
 
+    /* 刷新恢复显示 */
     const cache = getPlayerCache();
     if(cache) renderPlayer(cache);
 
-    /* ========= 背包弹窗逻辑 ========= */
-    const bagModal = $("bagModal");
-    const bagModalBody = $("bagModalBody");
-    const openBagBtn = $("openBagBtn");
-    const closeBagModal = $("closeBagModal");
-    const bagTabMedicine = $("bagTabMedicine");
-    const bagTabEquip = $("bagTabEquip");
-    const bagTabItem = $("bagTabItem");
+    /* =========================
+       战斗列表逻辑（右侧）
+       ========================= */
 
-    function openBagModal(){
-        bagModal.style.display = "flex";
-        // 默认激活物品标签 (但物品未实现)
-        setBagTabActive('item');
-        bagModalBody.innerHTML = `<div class="hint" style="text-align:center; padding:40px 0;">👜 物品功能暂未开放</div>`;
-    }
-    function closeBagModalFn(){
-        bagModal.style.display = "none";
-    }
-    function setBagTabActive(tab){
-        [bagTabEquip, bagTabMedicine, bagTabItem].forEach(btn => btn.classList.remove('active'));
-        if(tab === 'medicine') bagTabMedicine.classList.add('active');
-        else if(tab === 'equip') bagTabEquip.classList.add('active');
-        else if(tab === 'item') bagTabItem.classList.add('active');
-    }
-
-    openBagBtn.onclick = ()=>{
-        const p = getPlayerCache();
-        if(!p || p.id == null){
-            setTip("请先登录", false);
-            return;
-        }
-        openBagModal();
-    };
-
-    closeBagModal.onclick = closeBagModalFn;
-    bagModal.addEventListener("click", (e)=>{
-        if(e.target === bagModal) closeBagModalFn();
-    });
-
-    // 药品标签点击
-    bagTabMedicine.onclick = async ()=>{
-        const p = getPlayerCache();
-        if(!p || p.id == null){
-            setTip("请先登录", false);
-            closeBagModalFn();
-            return;
-        }
-        setBagTabActive('medicine');
-        bagModalBody.innerHTML = `<div class="hint">加载药品中...</div>`;
-        try{
-            const medicineList = await doShowMedicine(p.id);
-            bagModalBody.innerHTML = renderMedicineTable(medicineList);
-        }catch(err){
-            bagModalBody.innerHTML = `<div class="hint">加载失败：<code>${escapeHtml(err.message)}</code></div>`;
-        }
-    };
-
-    // 装备标签(暂未实现)
-    bagTabEquip.onclick = ()=>{
-        setBagTabActive('equip');
-        bagModalBody.innerHTML = `<div class="hint" style="text-align:center;">⚔️ 装备功能暂未开放</div>`;
-    };
-    // 物品标签(默认)
-    bagTabItem.onclick = ()=>{
-        setBagTabActive('item');
-        bagModalBody.innerHTML = `<div class="hint" style="text-align:center;">👜 物品功能暂未开放</div>`;
-    };
-
-    /* ========= 战斗列表等现有逻辑保持不变 ========= */
     function openEnemyPanel(){
         $("enemyPanel").style.display = "block";
     }
@@ -1416,9 +1354,13 @@
         }
     };
 
-    // 战斗相关变量与事件 (略, 保持原有不变)
-    let battleFightCache = null;
-    function openBattleScreen(){ $("battleScreen").style.display = "block"; }
+    /* =========================
+       ✅ 近全屏战斗页面逻辑
+       ========================= */
+
+    function openBattleScreen(){
+        $("battleScreen").style.display = "block";
+    }
     function closeBattleScreen(){
         $("battleScreen").style.display = "none";
         $("battleTitle").textContent = "战斗";
@@ -1429,9 +1371,18 @@
         $("battleSkillRow2").innerHTML = "";
         battleFightCache = null;
     }
-    $("battleBack").onclick = closeBattleScreen;
 
-    function renderBattleTopByFight(fight){ /* 原有实现, 此处略, 保留原样 */
+    /* ✅ 初始化时：返回按钮禁用 */
+    $("battleBack").onclick = ()=>{
+        closeBattleScreen();
+    };
+
+    /* =========================
+       ✅ 战斗 Fight 缓存
+       ========================= */
+    let battleFightCache = null;
+
+    function renderBattleTopByFight(fight){
         const pName = fight?.playerName ?? "";
         const pLv   = fight?.playerLv ?? "";
         const pHpMax = fight?.playerHpMax ?? "";
@@ -1453,6 +1404,7 @@
             `<div class="line">${escapeHtml(eName)} lv${escapeHtml(eLv)}</div>` +
             `<div class="line">hp：${escapeHtml(eHpCur)}/${escapeHtml(eHpMax)}</div>`;
     }
+
     function renderBattleLogByFight(fight){
         const logs = Array.isArray(fight?.log) ? fight.log : [];
         if(logs.length === 0){
@@ -1465,6 +1417,7 @@
         ).join("");
         $("battleLog").innerHTML = `<div class="log-box">${html}</div>`;
     }
+
     function renderBattleSkillSlots(slots, idNameMap){
         const arr = new Array(9).fill(null);
         (slots || []).forEach(it=>{
@@ -1474,7 +1427,8 @@
             }
         });
 
-        const row1 = [], row2 = [];
+        const row1 = [];
+        const row2 = [];
         for(let i=1;i<=8;i++){
             const it = arr[i];
             const skillId = it ? toInt(it.skillId) : null;
@@ -1488,7 +1442,7 @@
                 const name = idNameMap && idNameMap.get(skillId) ? idNameMap.get(skillId) : "";
                 text = name ? name : "未知技能";
                 cls = "skill-slot-btn";
-                disabled = "";
+                disabled = "";          // 是否能点由 updateBattleControls 再统一控制
                 dataSkillId = String(skillId);
             }
 
@@ -1504,14 +1458,72 @@
         $("battleSkillRow2").innerHTML = row2.join("");
     }
 
+    /* ✅ 新增：奖励弹窗相关函数 */
+    function showRewardModal(rewardData){
+        if(!rewardData) return;
+
+        // 构建奖励信息HTML
+        let rewardHtml = "";
+
+        // 经验奖励
+        if(rewardData.exp != null){
+            rewardHtml += `
+                <div class="reward-item">
+                    <div class="reward-label">经验</div>
+                    <div class="reward-value">+${escapeHtml(rewardData.exp)}</div>
+                </div>
+            `;
+        }
+
+        // 金币奖励
+        if(rewardData.money != null){
+            rewardHtml += `
+                <div class="reward-item">
+                    <div class="reward-label">金币</div>
+                    <div class="reward-value">+${escapeHtml(rewardData.money)}</div>
+                </div>
+            `;
+        }
+
+        // 可能还有其他奖励信息，可以继续添加
+        // 例如：物品掉落等
+
+        // 如果有奖励信息，显示弹窗
+        if(rewardHtml){
+            $("rewardModalBody").innerHTML = rewardHtml + `
+                <div class="reward-total">
+                    <div class="label">总计奖励</div>
+                    <div class="value">已获得</div>
+                </div>
+                <button class="reward-continue-btn" id="continueAfterReward">继续</button>
+            `;
+
+            // 显示奖励弹窗
+            $("rewardModal").style.display = "flex";
+
+            // 绑定继续按钮事件
+            $("continueAfterReward").onclick = () => {
+                $("rewardModal").style.display = "none";
+            };
+        }
+    }
+
+    $("closeRewardBtn").onclick = () => {
+        $("rewardModal").style.display = "none";
+    };
+
+    /* ✅ 根据血量控制：返回按钮 & 技能按钮，并在胜利时调用奖励接口 */
     async function updateBattleControls(fight){
         const backBtn = $("battleBack");
         const pHp = Number(fight?.curPlayerHp ?? 0);
         const eHp = Number(fight?.curEnemyHp ?? 0);
 
         const ended = (pHp <= 0) || (eHp <= 0);
+
+        // 返回按钮：战斗未结束 => 禁用；结束 => 启用
         backBtn.disabled = !ended;
 
+        // 技能按钮：战斗未结束 => 启用（非空）；结束 => 全禁用
         const skillBtns = $("battleScreen").querySelectorAll(".skill-slot-btn");
         skillBtns.forEach(b=>{
             const sid = toInt(b.getAttribute("data-skill-id"));
@@ -1523,55 +1535,88 @@
             }
         });
 
+        // 弹窗：结束时提示
         if(ended){
             const p = getPlayerCache();
             if(pHp <= 0){
                 alert("你失败了");
             }else if(eHp <= 0){
                 alert("你胜利了");
+
+                // ✅ 战斗胜利，调用奖励接口
                 try{
                     if(p && p.id){
+                        // 调用奖励接口
                         const rewardResult = await doReward(p.id);
-                        if(rewardResult) showRewardModal(rewardResult);
+
+                        // 显示奖励信息
+                        if(rewardResult){
+                            showRewardModal(rewardResult);
+                        }
+
+                        // ✅ 调用更新玩家信息接口，更新主界面
                         const updateResult = await doUpdatePlayer(p.id);
                         if(updateResult && updateResult.data){
+                            // 更新主界面玩家信息
                             renderPlayer(updateResult.data);
                             setPlayerCache(updateResult.data);
                         }
                     }
                 }catch(err){
                     console.error("获取奖励失败：", err);
+                    // 即使奖励失败，也允许继续
                 }
             }
         }
     }
 
+    /* ✅ 点击技能槽 -> useSkill -> 返回 Fight -> 更新页面 + 判断胜负 */
     $("battleScreen").addEventListener("click", async (e)=>{
         const btn = e.target.closest(".skill-slot-btn");
-        if(!btn || btn.disabled) return;
+        if(!btn) return;
+
+        // 被禁用就不处理
+        if(btn.disabled) return;
 
         const p = getPlayerCache();
-        if(!p || p.id == null){ setTip("请先登录", false); return; }
+        if(!p || p.id == null){
+            setTip("请先登录", false);
+            return;
+        }
 
         const skillId = toInt(btn.getAttribute("data-skill-id"));
-        if(skillId == null) return;
+        if(skillId == null){
+            return;
+        }
 
-        if(!battleFightCache){ setTip("战斗未初始化", false); return; }
+        // 战斗必须已初始化
+        if(!battleFightCache){
+            setTip("战斗未初始化", false);
+            return;
+        }
 
+        // 临时禁用所有技能按钮，防止连点
         const skillBtns = $("battleScreen").querySelectorAll(".skill-slot-btn");
         skillBtns.forEach(b=> b.disabled = true);
 
         try{
             const fight = await doUseSkill(p.id, skillId);
             battleFightCache = fight;
+
             $("battleTitle").textContent = `战斗：${fight?.enemyName ?? ""} lv${fight?.enemyLv ?? ""}`;
             renderBattleTopByFight(fight);
             renderBattleLogByFight(fight);
+
             updateBattleControls(fight);
         }catch(err){
             setTip(String(err.message || err), false);
-            if(battleFightCache) updateBattleControls(battleFightCache);
-            else $("battleBack").disabled = true;
+            // 失败：如果战斗未结束，则恢复可点状态
+            if(battleFightCache){
+                updateBattleControls(battleFightCache);
+            }else{
+                // 默认：返回仍禁用
+                $("battleBack").disabled = true;
+            }
         }
     });
 
@@ -1583,7 +1628,10 @@
         if(!row) return;
 
         const p = getPlayerCache();
-        if(!p || p.id == null){ setTip("请先登录", false); return; }
+        if(!p || p.id == null){
+            setTip("请先登录", false);
+            return;
+        }
 
         const enemy = {
             id: toInt(row.getAttribute("data-enemy-id")),
@@ -1598,7 +1646,10 @@
         }
 
         openBattleScreen();
+
+        // ✅ 初始化时：返回按钮禁用
         $("battleBack").disabled = true;
+
         $("battleTitle").textContent = `战斗：加载中...`;
         $("battlePlayerBox").innerHTML = `<div class="hint">加载中...</div>`;
         $("battleEnemyBox").innerHTML = `<div class="hint">加载中...</div>`;
@@ -1609,6 +1660,7 @@
         try{
             const fight = await doInitFight(p.id, enemy.id, enemy.enemyLv);
             battleFightCache = fight;
+
             $("battleTitle").textContent = `战斗：${fight?.enemyName ?? ""} lv${fight?.enemyLv ?? ""}`;
             renderBattleTopByFight(fight);
             renderBattleLogByFight(fight);
@@ -1622,7 +1674,10 @@
             skillIdNameMap = buildSkillIdNameMap(skills);
 
             renderBattleSkillSlots(slots, skillIdNameMap);
+
+            // ✅ 初始化后：血量都不为0 => 返回按钮继续禁用；胜负则弹窗并解锁
             updateBattleControls(fight);
+
         }catch(err){
             setTip(String(err.message || err), false);
             $("battlePlayerBox").innerHTML = `<div class="hint">初始化失败：<code>${escapeHtml(String(err.message || err))}</code></div>`;
@@ -1630,29 +1685,12 @@
             $("battleLog").innerHTML = `<div class="log-box"><div class="log-empty">log不可用</div></div>`;
             $("battleSkillRow1").innerHTML = ``;
             $("battleSkillRow2").innerHTML = ``;
-            $("battleBack").disabled = false;
+            $("battleBack").disabled = false; // 初始化失败允许返回
         }
     });
 
-    function showRewardModal(rewardData){
-        if(!rewardData) return;
-        let rewardHtml = "";
-        if(rewardData.exp != null){
-            rewardHtml += `<div class="reward-item"><div class="reward-label">经验</div><div class="reward-value">+${escapeHtml(rewardData.exp)}</div></div>`;
-        }
-        if(rewardData.money != null){
-            rewardHtml += `<div class="reward-item"><div class="reward-label">金币</div><div class="reward-value">+${escapeHtml(rewardData.money)}</div></div>`;
-        }
-        if(rewardHtml){
-            $("rewardModalBody").innerHTML = rewardHtml + `
-                <div class="reward-total"><div class="label">总计奖励</div><div class="value">已获得</div></div>
-                <button class="reward-continue-btn" id="continueAfterReward">继续</button>
-            `;
-            $("rewardModal").style.display = "flex";
-            $("continueAfterReward").onclick = () => { $("rewardModal").style.display = "none"; };
-        }
-    }
-    $("closeRewardBtn").onclick = () => { $("rewardModal").style.display = "none"; };
+    // 背包按钮：不绑定事件（按你要求）
 </script>
+
 </body>
 </html>
