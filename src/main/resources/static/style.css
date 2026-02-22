@@ -1,0 +1,633 @@
+body{margin:0;background:#0b0b0b;color:#fff;font-family:Arial,"Microsoft YaHei",sans-serif;}
+
+/* 右上角登录框 */
+.top-right-form{
+    position:fixed;top:12px;right:12px;
+    display:flex;align-items:center;gap:6px;
+    padding:10px;background:#121212;
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:12px;z-index:999;
+}
+.top-right-form input{
+    width:92px;padding:6px 8px;border-radius:8px;
+    border:1px solid rgba(255,255,255,.25);
+    background:rgba(255,255,255,.05);
+    color:#fff;font-size:12px;outline:none;
+}
+.top-right-form button{
+    width:58px;height:28px;border-radius:8px;
+    border:1px solid rgba(255,255,255,.25);
+    background:#fff;color:#111;font-weight:800;font-size:12px;cursor:pointer;
+}
+.top-right-form button.secondary{background:transparent;color:#fff;}
+.mini-tip{font-size:12px;margin-left:6px;}
+.mini-tip.ok{color:#9efc9e;}
+.mini-tip.bad{color:#ffb3b3;}
+
+/* 左上角玩家信息块 */
+.player-panel{
+    position:fixed;
+    top:12px;
+    left:12px;
+    width:160px;
+    padding:10px 12px;
+    background:#121212;
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:12px;
+    font-size:12px;
+    line-height:1.7;
+    z-index:998;
+    display:none;
+}
+.player-panel b{font-size:13px;color:#fff;}
+.player-panel .update-btn{
+    margin-top:8px;
+    width:100%;
+    height:28px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.25);
+    background:#fff;
+    color:#111;
+    font-weight:900;
+    font-size:12px;
+    cursor:pointer;
+}
+
+/* 技能按钮（左侧，玩家信息块下方） */
+.skill-btn{
+    position:fixed;
+    top:190px;
+    left:12px;
+    width:184px;
+    padding:10px 12px;
+    background:#121212;
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:12px;
+    z-index:998;
+    display:none;
+    box-sizing:border-box;
+}
+.skill-btn button{
+    width:100%;
+    height:32px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.25);
+    background:#fff;
+    color:#111;
+    font-weight:900;
+    font-size:12px;
+    cursor:pointer;
+}
+
+/* ========= 新增：背包按钮，紧挨技能下方 ========= */
+.bag-btn-wrap{
+    position:fixed;
+    top:250px;          /* 190 + 52(技能区块高度) + 8间距 ≈ 250 */
+    left:12px;
+    width:184px;
+    padding:10px 12px;
+    background:#121212;
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:12px;
+    z-index:998;
+    display:none;
+    box-sizing:border-box;
+}
+.bag-btn-wrap button{
+    width:100%;
+    height:32px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.25);
+    background:#fff;
+    color:#111;
+    font-weight:900;
+    font-size:12px;
+    cursor:pointer;
+}
+
+/* 技能弹层 */
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.6);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+    padding:20px;
+    box-sizing:border-box;
+}
+.modal .card{
+    width:min(1100px, 96vw);
+    background:#121212;
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:16px;
+    box-shadow:0 20px 60px rgba(0,0,0,.55);
+    overflow:hidden;
+}
+.modal .head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:12px 14px;
+    border-bottom:1px solid rgba(255,255,255,.12);
+}
+.modal .title{
+    font-weight:900;
+    font-size:14px;
+    letter-spacing:.5px;
+}
+.modal .tabs{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    justify-content:flex-end;
+    flex-wrap:wrap;
+}
+.tab-btn{
+    height:28px;
+    padding:0 10px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.25);
+    background:transparent;
+    color:#fff;
+    font-weight:800;
+    font-size:12px;
+    cursor:pointer;
+    opacity:.9;
+}
+.tab-btn.active{
+    background:#fff;
+    color:#111;
+    opacity:1;
+}
+.close-btn{
+    height:28px;
+    padding:0 10px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.25);
+    background:transparent;
+    color:#fff;
+    font-weight:800;
+    font-size:12px;
+    cursor:pointer;
+}
+
+.modal .body{
+    padding:12px 14px 14px;
+}
+
+/* 装备槽（8个框） */
+.slot-wrap{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:12px;
+}
+.slot{
+    width:calc(25% - 8px);
+    min-width:150px;
+    height:48px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.15);
+    background:rgba(255,255,255,.04);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:900;
+    font-size:12px;
+    color:#fff;
+    box-sizing:border-box;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    padding:0 10px;
+}
+.slot.empty{opacity:.75;font-weight:800;}
+
+/* 通用表格 */
+table{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+    font-size:12px;
+}
+th, td{
+    border:1px solid rgba(255,255,255,.12);
+    padding:8px 10px;
+    text-align:center;
+    word-break:break-all;
+}
+thead th{
+    background:rgba(255,255,255,.06);
+    font-weight:900;
+}
+tbody tr:hover{background:rgba(255,255,255,.04);}
+
+.small table{font-size:11px;}
+.small th,.small td{padding:6px 8px;}
+
+.hint{
+    margin-top:10px;
+    font-size:12px;
+    opacity:.85;
+    line-height:1.6;
+}
+.hint code{
+    background:rgba(255,255,255,.08);
+    padding:2px 6px;
+    border-radius:8px;
+    border:1px solid rgba(255,255,255,.12);
+}
+
+/* 升级/装备按钮 */
+.up-btn{
+    height:26px;
+    padding:0 10px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.25);
+    background:#fff;
+    color:#111;
+    font-weight:900;
+    font-size:12px;
+    cursor:pointer;
+    white-space:nowrap;
+}
+.up-btn:disabled{opacity:.5;cursor:not-allowed;}
+
+.skill-table th, .skill-table td{padding:6px 6px;}
+.skill-table td:first-child,.skill-table th:first-child{text-align:left;padding-left:6px;}
+
+.equip-select{
+    height:26px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.25);
+    background:rgba(255,255,255,.05);
+    color:#fff;
+    font-weight:900;
+    font-size:12px;
+    outline:none;
+    padding:0 8px;
+}
+.equip-btn{
+    height:26px;
+    padding:0 10px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.25);
+    background:#fff;
+    color:#111;
+    font-weight:900;
+    font-size:12px;
+    cursor:pointer;
+    white-space:nowrap;
+    margin-left:6px;
+}
+.equip-btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* 战斗列表右侧 */
+.enemy-float-btn{
+    position:fixed;
+    right:12px;
+    top:50%;
+    transform:translateY(-50%);
+    width:34px;
+    height:25vh;
+    min-height:120px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.18);
+    background:#121212;
+    z-index:998;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    user-select:none;
+}
+.enemy-float-btn span{
+    writing-mode:vertical-rl;
+    text-orientation:mixed;
+    font-weight:900;
+    font-size:12px;
+    letter-spacing:2px;
+    opacity:.95;
+}
+.enemy-panel{
+    position:fixed;
+    right:12px;
+    top:70px;
+    bottom:70px;
+    width:min(25vw, 360px);
+    min-width:260px;
+    background:#121212;
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:16px;
+    box-shadow:0 20px 60px rgba(0,0,0,.55);
+    z-index:998;
+    display:none;
+    overflow:hidden;
+}
+.enemy-panel .head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 12px;
+    border-bottom:1px solid rgba(255,255,255,.12);
+}
+.enemy-panel .head .t{
+    font-weight:900;
+    font-size:13px;
+    letter-spacing:.5px;
+}
+.enemy-panel .head .x{
+    height:26px;
+    padding:0 10px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.25);
+    background:transparent;
+    color:#fff;
+    font-weight:900;
+    font-size:12px;
+    cursor:pointer;
+}
+.enemy-panel .body{
+    padding:10px 12px 12px;
+    height:calc(100% - 48px);
+    overflow:auto;
+}
+.enemy-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 10px;
+    border:1px solid rgba(255,255,255,.10);
+    background:rgba(255,255,255,.04);
+    border-radius:14px;
+    margin-bottom:10px;
+}
+.enemy-row .label{
+    font-weight:900;
+    font-size:12px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+.enemy-row .fight-btn{
+    height:26px;
+    padding:0 10px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.25);
+    background:#fff;
+    color:#111;
+    font-weight:900;
+    font-size:12px;
+    cursor:pointer;
+    white-space:nowrap;
+}
+
+/* 战斗全屏界面 */
+.battle-screen{
+    position:fixed;
+    left:12px;
+    right:12px;
+    top:70px;
+    bottom:12px;
+    background:#121212;
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:16px;
+    box-shadow:0 20px 60px rgba(0,0,0,.55);
+    z-index:1001;
+    display:none;
+    overflow:hidden;
+}
+.battle-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 12px;
+    border-bottom:1px solid rgba(255,255,255,.12);
+}
+.battle-head .t{
+    font-weight:900;
+    font-size:13px;
+    letter-spacing:.5px;
+}
+.battle-head .back{
+    height:26px;
+    padding:0 10px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.25);
+    background:transparent;
+    color:#fff;
+    font-weight:900;
+    font-size:12px;
+    cursor:pointer;
+}
+.battle-head .back:disabled{opacity:.5;cursor:not-allowed;}
+.battle-body{
+    padding:12px;
+    height:calc(100% - 48px);
+    box-sizing:border-box;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    gap:12px;
+    overflow:hidden;
+}
+.battle-top{
+    position:relative;
+    flex:0 0 auto;
+    min-height:120px;
+}
+.stat-box{
+    display:inline-block;
+    width:auto;
+    max-width:50%;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.04);
+    border-radius:14px;
+    padding:10px 12px;
+    box-sizing:border-box;
+    font-size:12px;
+    line-height:1.7;
+    vertical-align:top;
+}
+.battle-player-box{
+    position:absolute;
+    left:0;
+    top:0;
+}
+.battle-enemy-box{
+    position:absolute;
+    right:0;
+    top:0;
+    text-align:left;
+}
+.stat-box .line{
+    font-weight:900;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+.battle-bottom{
+    flex:0 0 auto;
+    border-top:1px solid rgba(255,255,255,.10);
+    padding-top:12px;
+}
+.battle-skill-row{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:10px;
+}
+.battle-mid-row{
+    display:flex;
+    justify-content:flex-end;
+    margin:10px 0;
+}
+.bag-btn{
+    height:30px;
+    padding:0 12px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.25);
+    background:#fff;
+    color:#111;
+    font-weight:900;
+    font-size:12px;
+    cursor:pointer;
+}
+.skill-slot-btn{
+    height:46px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.15);
+    background:rgba(255,255,255,.04);
+    color:#fff;
+    font-weight:900;
+    font-size:12px;
+    cursor:pointer;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    padding:0 10px;
+    text-align:center;
+}
+.skill-slot-btn.empty{opacity:.75;font-weight:800;}
+.skill-slot-btn:disabled{opacity:.5;cursor:not-allowed;}
+.battle-log{
+    flex:1 1 auto;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    padding:8px 0;
+    overflow:hidden;
+}
+.battle-log .log-box{
+    width:min(800px, 92%);
+    max-height:160px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.04);
+    border-radius:14px;
+    padding:10px 12px;
+    box-sizing:border-box;
+    font-size:12px;
+    line-height:1.6;
+    overflow:auto;
+    opacity:.95;
+}
+.battle-log .log-line{
+    margin:0 0 6px 0;
+    white-space:pre-wrap;
+    word-break:break-word;
+}
+.battle-log .log-empty{opacity:.7;}
+
+/* 奖励弹窗 */
+.reward-modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.8);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:1002;
+    padding:20px;
+    box-sizing:border-box;
+}
+.reward-modal .card{
+    width:min(400px, 96vw);
+    background:#121212;
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:16px;
+    box-shadow:0 20px 60px rgba(0,0,0,.75);
+    overflow:hidden;
+}
+.reward-modal .head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:12px 14px;
+    border-bottom:1px solid rgba(255,255,255,.12);
+}
+.reward-modal .title{
+    font-weight:900;
+    font-size:14px;
+    letter-spacing:.5px;
+    color:#9efc9e;
+}
+.reward-modal .close-reward-btn{
+    height:28px;
+    padding:0 10px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.25);
+    background:transparent;
+    color:#fff;
+    font-weight:900;
+    font-size:12px;
+    cursor:pointer;
+}
+.reward-modal .body{
+    padding:20px 14px;
+}
+.reward-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:8px 0;
+    border-bottom:1px solid rgba(255,255,255,.08);
+}
+.reward-item:last-child{border-bottom:none;}
+.reward-label{font-weight:900;font-size:13px;color:#fff;}
+.reward-value{font-weight:900;font-size:13px;color:#9efc9e;}
+.reward-total{
+    margin-top:16px;
+    padding-top:16px;
+    border-top:2px solid rgba(255,255,255,.15);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+.reward-total .label{font-weight:900;font-size:14px;color:#fff;}
+.reward-total .value{font-weight:900;font-size:14px;color:#9efc9e;}
+.reward-continue-btn{
+    margin-top:20px;
+    width:100%;
+    height:36px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.25);
+    background:#fff;
+    color:#111;
+    font-weight:900;
+    font-size:13px;
+    cursor:pointer;
+}
+
+/* ========= 背包弹窗 (复用modal样式, 单独id用于控制) ========= */
+#bagModal .body{
+    min-height:300px;
+}
+/* 药品表格紧凑 */
+.medicine-table th, .medicine-table td{
+    padding:8px 6px;
+}
