@@ -2,6 +2,7 @@ package com.example.game.controller;
 
 import com.example.game.controller.dto.FightReq;
 import com.example.game.controller.dto.RewardReq;
+import com.example.game.controller.dto.UseMedicineReq;
 import com.example.game.controller.dto.UseSkillReq;
 import com.example.game.pojo.Result;
 import com.example.game.service.FightService;
@@ -29,6 +30,11 @@ public class FightController {
     @PostMapping("/useskill")
     public Result useSkill(@RequestBody UseSkillReq useSkillReq){
         return fightService.useSkill(useSkillReq);
+    }
+
+    @PostMapping("/usemedicine")
+    public Result useMedicine(@RequestBody UseMedicineReq useMedicineReq){
+        return fightService.useMedicine(useMedicineReq);
     }
 
     @PostMapping("/reward")

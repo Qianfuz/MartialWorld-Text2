@@ -38,11 +38,13 @@ const API = {
     equipSkill: "/players/skills/equip",
     useSkill: "/useskill",
     reward: "/reward",
-    showMedicine: "/players/showmedicine"
+    showMedicine: "/players/showmedicine",
+    useMedicine: "/usemedicine"
 };
 
 // ==================== 网络请求 ====================
 async function postJson(url,data){
+    console.log(`POST ${url}`, data);
     const res = await fetch(url,{
         method:"POST",
         headers:{ "Content-Type":"application/json" },
@@ -660,6 +662,7 @@ function closeBattleScreen(){
     $("battleSkillRow1").innerHTML = "";
     $("battleSkillRow2").innerHTML = "";
     battleFightCache = null;
+    hideMedicineOverlay();
 }
 $("battleBack").onclick = closeBattleScreen;
 
@@ -882,6 +885,155 @@ async function doReward(playerId){
     const r = await postJson(API.reward, { playerId });
     if(r && r.code === 1) return r.data;
     throw new Error((r && r.msg) ? r.msg : "获取奖励失败");
+}
+
+// ==================== 药品覆盖层（网格分页版） ====================
+const medicineOverlay = $("medicineOverlay");
+const medicineGrid = $("medicineGrid");
+const closeMedicineOverlay = $("closeMedicineOverlay");
+const prevMedicinePage = $("prevMedicinePage");
+const nextMedicinePage = $("nextMedicinePage");
+const medicinePageInfo = $("medicinePageInfo");
+
+let medicineListData = [];          // 当前加载的所有药品
+let currentMedicinePage = 1;
+let totalMedicinePages = 1;
+
+function showMedicineOverlay() {
+    medicineOverlay.style.display = "flex";
+}
+function hideMedicineOverlay() {
+    medicineOverlay.style.display = "none";
+}
+
+closeMedicineOverlay.onclick = () => {
+    hideMedicineOverlay();
+};
+
+// 更新分页按钮状态
+function updatePaginationButtons() {
+    prevMedicinePage.disabled = currentMedicinePage <= 1;
+    nextMedicinePage.disabled = currentMedicinePage >= totalMedicinePages;
+    medicinePageInfo.textContent = `${currentMedicinePage}/${totalMedicinePages}`;
+}
+
+// 渲染当前页药品网格
+function renderMedicineGrid() {
+    if (!medicineListData.length) {
+        medicineGrid.innerHTML = `<div class="hint" style="grid-column:span 4; text-align:center;">暂无药品</div>`;
+        totalMedicinePages = 1;
+        currentMedicinePage = 1;
+        updatePaginationButtons();
+        return;
+    }
+
+    totalMedicinePages = Math.ceil(medicineListData.length / 8);
+    if (currentMedicinePage > totalMedicinePages) currentMedicinePage = totalMedicinePages;
+    if (currentMedicinePage < 1) currentMedicinePage = 1;
+
+    const start = (currentMedicinePage - 1) * 8;
+    const pageItems = medicineListData.slice(start, start + 8);
+
+    let html = '';
+    for (let i = 0; i < 8; i++) {
+        const medicine = pageItems[i];
+        if (medicine) {
+            const id = medicine.id;
+            const name = medicine.name || '未知';
+            const hp = medicine.restoreHp || 0;
+            const mp = medicine.restoreMp || 0;
+            const num = medicine.number || 0;
+            // 组装显示文本：名称 恢复血量：xx 恢复蓝量：xx 个数：x
+            const infoText = `${name} 恢复血量：${hp} 恢复蓝量：${mp} 个数：${num}`;
+            html += `
+                <div class="medicine-slot">
+                    <span class="medicine-info" title="${escapeHtml(infoText)}">${escapeHtml(infoText)}</span>
+                    <button class="use-medicine-btn" data-medicine-id="${escapeHtml(id)}" ${num <= 0 ? 'disabled' : ''}>使用</button>
+                </div>
+            `;
+        } else {
+            // 空槽位
+            html += `<div class="medicine-slot empty">空</div>`;
+        }
+    }
+    medicineGrid.innerHTML = html;
+    updatePaginationButtons();
+
+    // 绑定使用按钮事件
+    medicineGrid.querySelectorAll('.use-medicine-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const medicineId = toInt(btn.getAttribute('data-medicine-id'));
+            if (!medicineId) return;
+            btn.disabled = true;
+            const p = getPlayerCache();
+            if (!p || p.id == null) {
+                setTip("请先登录", false);
+                btn.disabled = false;
+                return;
+            }
+            try {
+                const fight = await doUseMedicine(p.id, medicineId);
+                battleFightCache = fight;
+                $("battleTitle").textContent = `战斗：${fight?.enemyName ?? ""} lv${fight?.enemyLv ?? ""}`;
+                renderBattleTopByFight(fight);
+                renderBattleLogByFight(fight);
+                updateBattleControls(fight);
+                hideMedicineOverlay();
+
+                // 使用后重新加载药品列表，以便更新数量（可选）
+                const medicines = await doShowMedicine(p.id);
+                medicineListData = medicines;
+                renderMedicineGrid();
+            } catch (err) {
+                setTip(String(err.message || err), false);
+                btn.disabled = false;
+            }
+        });
+    });
+}
+
+// 上一页
+prevMedicinePage.onclick = () => {
+    if (currentMedicinePage > 1) {
+        currentMedicinePage--;
+        renderMedicineGrid();
+    }
+};
+
+// 下一页
+nextMedicinePage.onclick = () => {
+    if (currentMedicinePage < totalMedicinePages) {
+        currentMedicinePage++;
+        renderMedicineGrid();
+    }
+};
+
+$("bagBtn").onclick = async () => {
+    if (!battleFightCache) {
+        setTip("没有进行中的战斗", false);
+        return;
+    }
+    const p = getPlayerCache();
+    if (!p || p.id == null) {
+        setTip("请先登录", false);
+        return;
+    }
+    showMedicineOverlay();
+    medicineGrid.innerHTML = `<div class="hint" style="grid-column:span 4; text-align:center;">加载药品中...</div>`;
+    try {
+        const medicines = await doShowMedicine(p.id);
+        medicineListData = medicines;
+        currentMedicinePage = 1;
+        renderMedicineGrid();
+    } catch (err) {
+        medicineGrid.innerHTML = `<div class="hint" style="grid-column:span 4; text-align:center;">加载失败：${escapeHtml(err.message)}</div>`;
+    }
+};
+
+async function doUseMedicine(playerId, medicineId) {
+    const r = await postJson(API.useMedicine, { playerId, medicineId });
+    if (r && r.code === 1) return r.data;
+    throw new Error((r && r.msg) ? r.msg : "使用药品失败");
 }
 
 // ==================== 奖励弹窗 ====================

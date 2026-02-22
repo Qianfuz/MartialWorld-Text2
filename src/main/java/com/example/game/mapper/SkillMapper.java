@@ -27,7 +27,7 @@ public interface SkillMapper {
     PlayerSkill getSkill(UpgradeReq upgradeReq);
 
     @Update("update skill_lv set lv = lv + 1 where skill_id = #{skillId} and player_id = #{playerId};")
-    void upgrade(UpgradeReq upgradeReq);
+    void upgradeSkill(UpgradeReq upgradeReq);
 
     @Update("update skill_equip set skill_id = #{skillId} where player_id = #{playerId} and slot_index = #{slotIndex};")
     void equipSkill(EquipSkillReq equipSkillReq);

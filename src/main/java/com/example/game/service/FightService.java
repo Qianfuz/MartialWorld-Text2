@@ -2,6 +2,7 @@ package com.example.game.service;
 
 import com.example.game.controller.dto.FightReq;
 import com.example.game.controller.dto.RewardReq;
+import com.example.game.controller.dto.UseMedicineReq;
 import com.example.game.controller.dto.UseSkillReq;
 import com.example.game.pojo.Result;
 import org.springframework.stereotype.Service;
@@ -13,4 +14,6 @@ public interface FightService {
     Result useSkill(UseSkillReq useSkillReq);
 
     Result reward(RewardReq rewardReq);
+
+    Result useMedicine(UseMedicineReq useMedicineReq);
 }

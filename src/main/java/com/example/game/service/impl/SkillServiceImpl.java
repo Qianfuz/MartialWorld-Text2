@@ -46,13 +46,13 @@ public class SkillServiceImpl implements SkillService {
 
 
     @Override
-    public Result upgrade(UpgradeReq upgradeReq) {
+    public Result upgradeSkill(UpgradeReq upgradeReq) {
         Player p = playerMapper.getPlayer(upgradeReq.getPlayerId());
         PlayerSkill ps = skillMapper.getSkill(upgradeReq);
         Integer curSkillUpgradeCost=FightUtil.skillUpgradeCost(ps.getUpgradeCost(),ps.getLv());
         if(p.getMoney()>=curSkillUpgradeCost && p.getLv()>=ps.getLimitedLv()){
             p.setMoney(p.getMoney()-curSkillUpgradeCost);
-            skillMapper.upgrade(upgradeReq);
+            skillMapper.upgradeSkill(upgradeReq);
             playerMapper.updatePlayer(p);
             return Result.success("升级成功");
         } else {

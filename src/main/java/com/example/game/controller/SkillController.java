@@ -27,8 +27,8 @@ public class SkillController {
     }
 
     @PostMapping("/players/skills/upgrade")
-    public Result upgrade(@RequestBody UpgradeReq upgradeReq){
-        return skillService.upgrade(upgradeReq);
+    public Result upgradeSkill(@RequestBody UpgradeReq upgradeReq){
+        return skillService.upgradeSkill(upgradeReq);
     }
 
     @PostMapping("/players/skills/equip")

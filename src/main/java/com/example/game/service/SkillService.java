@@ -11,7 +11,7 @@ public interface SkillService {
 
     Result showSlot(ShowReq showReq);
 
-    Result upgrade(UpgradeReq upgradeReq);
+    Result upgradeSkill(UpgradeReq upgradeReq);
 
     Result equipSkill(EquipSkillReq equipSkillReq);
 }

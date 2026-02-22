@@ -1,64 +1,64 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Game · 背包扩展</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Game · 背包扩展</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="player-panel" id="playerPanel"></div>
 
 <div class="skill-btn" id="skillBtnWrap">
-    <button id="openSkillBtn">技能</button>
+  <button id="openSkillBtn">技能</button>
 </div>
 
 <!-- 新增：背包按钮，样式与技能完全一致，位于其下方 -->
 <div class="bag-btn-wrap" id="bagBtnWrap">
-    <button id="openBagBtn">背包</button>
+  <button id="openBagBtn">背包</button>
 </div>
 
 <div class="top-right-form">
-    <input id="userName" placeholder="用户名">
-    <input id="password" type="password" placeholder="密码">
-    <button id="registerBtn">注册</button>
-    <button id="loginBtn" class="secondary">登录</button>
-    <span class="mini-tip" id="tip"></span>
+  <input id="userName" placeholder="用户名">
+  <input id="password" type="password" placeholder="密码">
+  <button id="registerBtn">注册</button>
+  <button id="loginBtn" class="secondary">登录</button>
+  <span class="mini-tip" id="tip"></span>
 </div>
 
 <!-- 技能弹窗 -->
 <div class="modal" id="skillModal">
-    <div class="card">
-        <div class="head">
-            <div class="title" id="modalTitle">技能</div>
-            <div class="tabs">
-                <button class="tab-btn active" id="tabNormal">技能(1/3/4)</button>
-                <button class="tab-btn" id="tabGod">神技(2)</button>
-                <button class="close-btn" id="closeModal">关闭</button>
-            </div>
-        </div>
-        <div class="body" id="modalBody"></div>
+  <div class="card">
+    <div class="head">
+      <div class="title" id="modalTitle">技能</div>
+      <div class="tabs">
+        <button class="tab-btn active" id="tabNormal">技能(1/3/4)</button>
+        <button class="tab-btn" id="tabGod">神技(2)</button>
+        <button class="close-btn" id="closeModal">关闭</button>
+      </div>
     </div>
+    <div class="body" id="modalBody"></div>
+  </div>
 </div>
 
 <!-- 新增：背包弹窗 (药品/装备/物品) -->
 <div class="modal" id="bagModal">
-    <div class="card">
-        <div class="head">
-            <div class="title">背包</div>
-            <div class="tabs">
-                <button class="tab-btn" id="bagTabEquip">装备</button>
-                <button class="tab-btn" id="bagTabMedicine">药品</button>
-                <button class="tab-btn" id="bagTabItem">物品</button>
-                <button class="close-btn" id="closeBagModal">关闭</button>
-            </div>
-        </div>
-        <div class="body" id="bagModalBody">
-            <!-- 默认物品页面(暂未实现) -->
-            <div class="hint" style="text-align:center; padding:40px 0;">👜 物品功能暂未开放</div>
-        </div>
+  <div class="card">
+    <div class="head">
+      <div class="title">背包</div>
+      <div class="tabs">
+        <button class="tab-btn" id="bagTabEquip">装备</button>
+        <button class="tab-btn" id="bagTabMedicine">药品</button>
+        <button class="tab-btn" id="bagTabItem">物品</button>
+        <button class="close-btn" id="closeBagModal">关闭</button>
+      </div>
     </div>
+    <div class="body" id="bagModalBody">
+      <!-- 默认物品页面(暂未实现) -->
+      <div class="hint" style="text-align:center; padding:40px 0;">👜 物品功能暂未开放</div>
+    </div>
+  </div>
 </div>
 
 <!-- 战斗列表按钮 -->
@@ -66,44 +66,57 @@
 
 <!-- 怪物列表面板 -->
 <div class="enemy-panel" id="enemyPanel">
-    <div class="head">
-        <div class="t">怪物列表</div>
-        <button class="x" id="enemyPanelClose">关闭</button>
-    </div>
-    <div class="body" id="enemyPanelBody"></div>
+  <div class="head">
+    <div class="t">怪物列表</div>
+    <button class="x" id="enemyPanelClose">关闭</button>
+  </div>
+  <div class="body" id="enemyPanelBody"></div>
 </div>
 
 <!-- 全屏战斗页面 -->
 <div class="battle-screen" id="battleScreen">
-    <div class="battle-head">
-        <div class="t" id="battleTitle">战斗</div>
-        <button class="back" id="battleBack">返回</button>
+  <div class="battle-head">
+    <div class="t" id="battleTitle">战斗</div>
+    <button class="back" id="battleBack">返回</button>
+  </div>
+  <div class="battle-body">
+    <div class="battle-top">
+      <div class="stat-box battle-player-box" id="battlePlayerBox"></div>
+      <div class="stat-box battle-enemy-box" id="battleEnemyBox"></div>
     </div>
-    <div class="battle-body">
-        <div class="battle-top">
-            <div class="stat-box battle-player-box" id="battlePlayerBox"></div>
-            <div class="stat-box battle-enemy-box" id="battleEnemyBox"></div>
+    <div class="battle-log" id="battleLog"></div>
+    <div class="battle-bottom" id="battleBottom">
+      <!-- 新增：药品覆盖层（网格分页版） -->
+      <div class="medicine-overlay" id="medicineOverlay" style="display: none;">
+        <div class="medicine-overlay-header">
+          <span>药品</span>
+          <div class="pagination-controls">
+            <button class="page-btn" id="prevMedicinePage" disabled>‹</button>
+            <span id="medicinePageInfo">1/1</span>
+            <button class="page-btn" id="nextMedicinePage" disabled>›</button>
+          </div>
+          <button class="close-medicine-overlay" id="closeMedicineOverlay">关闭</button>
         </div>
-        <div class="battle-log" id="battleLog"></div>
-        <div class="battle-bottom">
-            <div class="battle-skill-row" id="battleSkillRow1"></div>
-            <div class="battle-mid-row">
-                <button class="bag-btn" id="bagBtn">背包</button>
-            </div>
-            <div class="battle-skill-row" id="battleSkillRow2"></div>
-        </div>
+        <div class="medicine-grid" id="medicineGrid"></div>
+      </div>
+      <div class="battle-skill-row" id="battleSkillRow1"></div>
+      <div class="battle-mid-row">
+        <button class="bag-btn" id="bagBtn">背包</button>
+      </div>
+      <div class="battle-skill-row" id="battleSkillRow2"></div>
     </div>
+  </div>
 </div>
 
 <!-- 奖励弹窗 -->
 <div class="reward-modal" id="rewardModal">
-    <div class="card">
-        <div class="head">
-            <div class="title">战斗胜利奖励</div>
-            <button class="close-reward-btn" id="closeRewardBtn">关闭</button>
-        </div>
-        <div class="body" id="rewardModalBody"></div>
+  <div class="card">
+    <div class="head">
+      <div class="title">战斗胜利奖励</div>
+      <button class="close-reward-btn" id="closeRewardBtn">关闭</button>
     </div>
+    <div class="body" id="rewardModalBody"></div>
+  </div>
 </div>
 
 <script src="script.js"></script>

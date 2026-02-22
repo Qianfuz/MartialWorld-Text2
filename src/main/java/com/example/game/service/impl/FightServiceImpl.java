@@ -1,11 +1,9 @@
 package com.example.game.service.impl;
 
 
-import com.example.game.controller.dto.FightReq;
-import com.example.game.controller.dto.RewardReq;
-import com.example.game.controller.dto.UpgradeReq;
-import com.example.game.controller.dto.UseSkillReq;
+import com.example.game.controller.dto.*;
 import com.example.game.mapper.EnemyMapper;
+import com.example.game.mapper.MedicineMapper;
 import com.example.game.mapper.PlayerMapper;
 import com.example.game.mapper.SkillMapper;
 import com.example.game.pojo.*;
@@ -23,13 +21,15 @@ public class FightServiceImpl implements FightService {
     private final PlayerMapper playerMapper;
     private final EnemyMapper enemyMapper;
     private final SkillMapper skillMapper;
+    private final MedicineMapper medicineMapper;
 
     @Autowired
-    public FightServiceImpl(FightMap fightMap, PlayerMapper playerMapper, EnemyMapper enemyMapper, SkillMapper skillMapper){
+    public FightServiceImpl(MedicineMapper medicineMapper, FightMap fightMap, PlayerMapper playerMapper, EnemyMapper enemyMapper, SkillMapper skillMapper){
         this.fightMap=fightMap;
         this.enemyMapper=enemyMapper;
         this.playerMapper=playerMapper;
         this.skillMapper = skillMapper;
+        this.medicineMapper=medicineMapper;
     }
 
     @Override
@@ -59,6 +59,8 @@ public class FightServiceImpl implements FightService {
 
     @Override
     public Result useSkill(UseSkillReq useSkillReq) {
+
+        //玩家回合
         PlayerSkill playerSkill = skillMapper.getSkill(new UpgradeReq(useSkillReq.getPlayerId(),useSkillReq.getSkillId()));
         Fight fight = fightMap.getFightConcurrentHashMap().get(useSkillReq.getPlayerId());
         StringBuilder sb = new StringBuilder();
@@ -74,6 +76,7 @@ public class FightServiceImpl implements FightService {
                 .append("造成了 ").append(playerAtk).append(" 点 伤害")
                 .append("\n");
 
+        //判断是否结束
         if(fight.getCurEnemyHp()-playerAtk<=0){
             fight.setCurEnemyHp(0);
             fight.getLog().add(sb.toString());
@@ -81,6 +84,50 @@ public class FightServiceImpl implements FightService {
         }
         fight.setCurEnemyHp(fight.getCurEnemyHp()-playerAtk);
 
+        //怪物回合
+        enemyTurn(fight,sb);
+
+        return Result.success(fight);
+    }
+
+    @Override
+    public Result useMedicine(UseMedicineReq useMedicineReq) {
+
+        Medicine medicine = medicineMapper.getMedicine(useMedicineReq);
+        Fight fight = fightMap.getFightConcurrentHashMap().get(useMedicineReq.getPlayerId());
+        StringBuilder sb = new StringBuilder();
+
+        if(medicine.getNumber()<=0){
+            return Result.error("药品不足");
+        }
+        //使用药品
+        medicineMapper.useMedicine(useMedicineReq);
+
+        if(medicine.getRestoreHp()>0){
+            fight.setCurPlayerHp(fight.getCurPlayerHp()+medicine.getRestoreHp());
+            sb.append("你 使用 ").append("[").append(medicine.getName()).append("] ")
+                    .append("恢复了 ").append(medicine.getRestoreHp()).append(" 点 血量")
+                    .append("\n");
+            if(fight.getCurPlayerHp()>fight.getPlayerHpMax()){
+                fight.setCurPlayerHp(fight.getPlayerHpMax());
+            }
+        }
+        if(medicine.getRestoreMp()>0){
+            fight.setCurPlayerMp(fight.getCurPlayerMp()+medicine.getRestoreMp());
+            sb.append("你 使用 ").append("[").append(medicine.getName()).append("] ")
+                    .append("恢复了 ").append(medicine.getRestoreMp()).append(" 点 蓝量")
+                    .append("\n");
+            if(fight.getCurPlayerMp()> fight.getPlayerMpMax()){
+                fight.setCurPlayerMp(fight.getPlayerMpMax());
+            }
+        }
+        //怪物回合
+        enemyTurn(fight,sb);
+
+        return Result.success(fight);
+    }
+
+    public void enemyTurn(Fight fight,StringBuilder sb){
         Random random = new Random();
         Integer index = random.nextInt(4)+1;
         EnemySkill enemySkill = enemyMapper.getEnemySkill(fight.getEnemyId(),index);
@@ -105,9 +152,8 @@ public class FightServiceImpl implements FightService {
                 fight.setCurEnemyHp(fight.getEnemyHpMax());
             }
         }
-
-        return Result.success(fight);
     }
+
 
     @Override
     public Result reward(RewardReq rewardReq) {
