@@ -81,7 +81,7 @@ java -jar target/Game-0.0.1-SNAPSHOT.jar
 启动成功后，在浏览器中打开：
 
 - **本地访问**：`http://localhost:8080/game.html`
-- **云服务器访问**：将 `localhost` 替换为你的服务器 IP 即可（示例：`http://122.51.118.82:8080/game.html`）
+- **云服务器访问**：将 `localhost` 替换为你的服务器 IP 即可 示例：[http://122.51.118.82:8080/game.html](http://122.51.118.82:8080/game.html)
 
 ## 📁 项目结构简述
 
