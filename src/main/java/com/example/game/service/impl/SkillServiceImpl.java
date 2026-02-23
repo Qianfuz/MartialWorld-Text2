@@ -12,6 +12,7 @@ import com.example.game.service.SkillService;
 import com.example.game.util.FightUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 @Service
@@ -44,7 +45,7 @@ public class SkillServiceImpl implements SkillService {
     }
 
 
-
+    @Transactional
     @Override
     public Result upgradeSkill(UpgradeReq upgradeReq) {
         Player p = playerMapper.getPlayer(upgradeReq.getPlayerId());

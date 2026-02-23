@@ -11,6 +11,7 @@ import com.example.game.service.FightService;
 import com.example.game.util.FightUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Random;
 
@@ -155,6 +156,7 @@ public class FightServiceImpl implements FightService {
     }
 
 
+    @Transactional
     @Override
     public Result reward(RewardReq rewardReq) {
         Player player = playerMapper.getPlayer(rewardReq.getPlayerId());

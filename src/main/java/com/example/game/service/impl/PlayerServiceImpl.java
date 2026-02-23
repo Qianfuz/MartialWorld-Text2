@@ -10,6 +10,7 @@ import com.example.game.pojo.Result;
 import com.example.game.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,9 +25,9 @@ public class PlayerServiceImpl implements PlayerService {
         this.playerMapper=playerMapper;
     }
 
+    @Transactional
     @Override
     public Result register(RegisterReq registerReq) {
-        //return playerMapper.register(registerReq);
         if(playerMapper.register(registerReq)>0){
             init(registerReq);
             return Result.success();
@@ -35,6 +36,7 @@ public class PlayerServiceImpl implements PlayerService {
         }
     }
 
+    @Transactional
     @Override
     public Result login(LoginReq loginReq) {
         if(playerMapper.login(loginReq)==null){
@@ -48,6 +50,7 @@ public class PlayerServiceImpl implements PlayerService {
         }
     }
 
+    @Transactional
     @Override
     public void init(RegisterReq registerReq){
         playerMapper.initSkillLv(playerMapper.getPlayerId(registerReq));
