@@ -1,3 +1,4 @@
+
 package com.example.game.mapper;
 
 import com.example.game.controller.dto.ShowReq;
@@ -14,11 +15,13 @@ import java.util.List;
 public interface MedicineMapper {
 
     @Select("select id, name, restore_hp, restore_mp, price, mn.number from medicine md join medicine_number mn on md.id = mn.medicine_id where player_id = #{playerId} and medicine_id = #{medicineId};")
-    Medicine getMedicine(UseMedicineReq useMedicineReq);
+    Medicine getPlayerMedicine(UseMedicineReq useMedicineReq);
 
     @Select("select id, name, restore_hp, restore_mp, price, mn.number from medicine md join medicine_number mn on md.id = mn.medicine_id where player_id = #{playerId};")
     List<Medicine> showMedicine(ShowReq showReq);
 
-    @Update("update medicine_number set number = number - 1 where player_id = #{playerId} and medicine_id = #{medicineId};")
-    void useMedicine(UseMedicineReq useMedicineReq);
+    @Update("update medicine_number set number = #{medicine.number} where player_id = #{playerId} and medicine_id = #{medicine.id};")
+    void updateMedicine(Medicine medicine,Integer playerId);
+
 }
+

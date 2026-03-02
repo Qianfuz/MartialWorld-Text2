@@ -14,9 +14,14 @@
   <button id="openSkillBtn">技能</button>
 </div>
 
-<!-- 新增：背包按钮，样式与技能完全一致，位于其下方 -->
+<!-- 背包按钮 -->
 <div class="bag-btn-wrap" id="bagBtnWrap">
   <button id="openBagBtn">背包</button>
+</div>
+
+<!-- 新增：商店按钮，位于背包按钮正下方 -->
+<div class="shop-btn-wrap" id="shopBtnWrap">
+  <button id="openShopBtn">商店</button>
 </div>
 
 <div class="top-right-form">
@@ -42,7 +47,7 @@
   </div>
 </div>
 
-<!-- 新增：背包弹窗 (药品/装备/物品) -->
+<!-- 背包弹窗 (药品/装备/物品) -->
 <div class="modal" id="bagModal">
   <div class="card">
     <div class="head">
@@ -57,6 +62,24 @@
     <div class="body" id="bagModalBody">
       <!-- 默认物品页面(暂未实现) -->
       <div class="hint" style="text-align:center; padding:40px 0;">👜 物品功能暂未开放</div>
+    </div>
+  </div>
+</div>
+
+<!-- 新增：商店弹窗 -->
+<div class="modal" id="shopModal">
+  <div class="card">
+    <div class="head">
+      <div class="title">商店</div>
+      <div class="tabs">
+        <button class="tab-btn" id="shopTabEquip">装备</button>
+        <button class="tab-btn active" id="shopTabMedicine">药品</button>
+        <button class="tab-btn" id="shopTabItem">物品</button>
+        <button class="close-btn" id="closeShopModal">关闭</button>
+      </div>
+    </div>
+    <div class="body" id="shopModalBody">
+      <!-- 默认药品内容会动态加载 -->
     </div>
   </div>
 </div>
@@ -86,7 +109,7 @@
     </div>
     <div class="battle-log" id="battleLog"></div>
     <div class="battle-bottom" id="battleBottom">
-      <!-- 新增：药品覆盖层（网格分页版） -->
+      <!-- 药品覆盖层（网格分页版） -->
       <div class="medicine-overlay" id="medicineOverlay" style="display: none;">
         <div class="medicine-overlay-header">
           <span>药品</span>

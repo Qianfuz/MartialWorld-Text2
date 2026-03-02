@@ -39,7 +39,8 @@ const API = {
     useSkill: "/useskill",
     reward: "/reward",
     showMedicine: "/players/showmedicine",
-    useMedicine: "/usemedicine"
+    useMedicine: "/usemedicine",
+    buyMedicine: "/players/buymedicine"   // 新增购买药品接口
 };
 
 // ==================== 网络请求 ====================
@@ -70,15 +71,18 @@ function renderPlayer(p){
     const box = $("playerPanel");
     const skillWrap = $("skillBtnWrap");
     const bagWrap = $("bagBtnWrap");
+    const shopWrap = $("shopBtnWrap");  // 新增商店按钮容器
     if(!p){
         box.style.display="none";
         skillWrap.style.display="none";
         if(bagWrap) bagWrap.style.display="none";
+        if(shopWrap) shopWrap.style.display="none"; // 隐藏商店按钮
         return;
     }
     box.style.display="block";
     skillWrap.style.display="block";
     if(bagWrap) bagWrap.style.display="block";
+    if(shopWrap) shopWrap.style.display="block"; // 显示商店按钮
     box.innerHTML =
         `<b>${escapeHtml(p.userName)}</b><br>` +
         `Lv: ${escapeHtml(p.lv)}<br>` +
@@ -596,6 +600,139 @@ function renderMedicineTable(medicines){
         <thead><tr><th>名称</th><th>恢复血量</th><th>恢复蓝量</th><th>拥有个数</th></tr></thead>
         <tbody>${rows}</tbody>
     </table>`;
+}
+
+// ==================== 商店模块 ====================
+const shopModal = $("shopModal");
+const shopModalBody = $("shopModalBody");
+const openShopBtn = $("openShopBtn");
+const closeShopModal = $("closeShopModal");
+const shopTabMedicine = $("shopTabMedicine");
+const shopTabEquip = $("shopTabEquip");
+const shopTabItem = $("shopTabItem");
+
+function openShopModal() {
+    shopModal.style.display = "flex";
+    setShopTabActive('medicine');
+    loadShopMedicine();
+}
+function closeShopModalFn() {
+    shopModal.style.display = "none";
+    shopModalBody.innerHTML = "";
+}
+function setShopTabActive(tab) {
+    [shopTabEquip, shopTabMedicine, shopTabItem].forEach(btn => btn.classList.remove('active'));
+    if (tab === 'medicine') shopTabMedicine.classList.add('active');
+    else if (tab === 'equip') shopTabEquip.classList.add('active');
+    else if (tab === 'item') shopTabItem.classList.add('active');
+}
+
+openShopBtn.onclick = ()=>{
+    const p = getPlayerCache();
+    if(!p || p.id == null){
+        setTip("请先登录", false);
+        return;
+    }
+    openShopModal();
+};
+closeShopModal.onclick = closeShopModalFn;
+shopModal.addEventListener("click", (e)=>{
+    if(e.target === shopModal) closeShopModalFn();
+});
+
+shopTabMedicine.onclick = async ()=>{
+    const p = getPlayerCache();
+    if(!p || p.id == null){
+        setTip("请先登录", false);
+        closeShopModalFn();
+        return;
+    }
+    setShopTabActive('medicine');
+    loadShopMedicine();
+};
+shopTabEquip.onclick = ()=>{
+    setShopTabActive('equip');
+    shopModalBody.innerHTML = `<div class="hint" style="text-align:center;">⚔️ 装备商店暂未开放</div>`;
+};
+shopTabItem.onclick = ()=>{
+    setShopTabActive('item');
+    shopModalBody.innerHTML = `<div class="hint" style="text-align:center;">👜 物品商店暂未开放</div>`;
+};
+
+async function loadShopMedicine() {
+    const p = getPlayerCache();
+    if (!p || p.id == null) return;
+    shopModalBody.innerHTML = `<div class="hint">加载药品中...</div>`;
+    try {
+        const medicineList = await doShowMedicine(p.id);
+        shopModalBody.innerHTML = renderShopMedicineTable(medicineList);
+    } catch (err) {
+        shopModalBody.innerHTML = `<div class="hint">加载失败：<code>${escapeHtml(err.message)}</code></div>`;
+    }
+}
+
+function renderShopMedicineTable(medicines) {
+    if (!medicines.length) {
+        return `<div class="hint" style="text-align:center;">暂无药品</div>`;
+    }
+    const rows = medicines.map(m => {
+        const id = m.id;
+        const name = m.name ?? '未知';
+        const hp = m.restoreHp ?? 0;
+        const mp = m.restoreMp ?? 0;
+        const num = m.number ?? 0;
+        const price = m.price ?? 0;
+        return `<tr>
+            <td>${escapeHtml(name)}</td>
+            <td>${escapeHtml(hp)}</td>
+            <td>${escapeHtml(mp)}</td>
+            <td>${escapeHtml(num)}</td>
+            <td>${escapeHtml(price)}</td>
+            <td><button class="buy-medicine-btn" data-medicine-id="${escapeHtml(id)}">购买</button></td>
+        </tr>`;
+    }).join('');
+    return `<table class="medicine-table">
+        <thead><tr><th>名称</th><th>恢复血量</th><th>恢复蓝量</th><th>拥有个数</th><th>价格</th><th>操作</th></tr></thead>
+        <tbody>${rows}</tbody>
+    </table>`;
+}
+
+// 购买药品事件委托
+shopModalBody.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.buy-medicine-btn');
+    if (!btn) return;
+    const medicineId = toInt(btn.getAttribute('data-medicine-id'));
+    if (!medicineId) return;
+    const p = getPlayerCache();
+    if (!p || p.id == null) {
+        setTip("请先登录", false);
+        return;
+    }
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = "购买中...";
+    try {
+        await doBuyMedicine(p.id, medicineId);
+        setTip("购买成功", true);
+        // 刷新玩家信息
+        const updateRes = await doUpdatePlayer(p.id);
+        if (updateRes && updateRes.data) {
+            renderPlayer(updateRes.data);
+            setPlayerCache(updateRes.data);
+        }
+        // 重新加载药品列表
+        await loadShopMedicine();
+    } catch (err) {
+        setTip(String(err.message || err), false);
+        // 重新加载列表以恢复按钮状态（可选）
+        await loadShopMedicine();
+    }
+});
+
+async function doBuyMedicine(playerId, medicineId) {
+    const r = await postJson(API.buyMedicine, { playerId, medicineId });
+    if (r && r.code === 1) return r.data;
+    throw new Error((r && r.msg) ? r.msg : "购买失败");
 }
 
 // ==================== 战斗列表模块 ====================

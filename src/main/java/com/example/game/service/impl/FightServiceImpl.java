@@ -94,7 +94,7 @@ public class FightServiceImpl implements FightService {
     @Override
     public Result useMedicine(UseMedicineReq useMedicineReq) {
 
-        Medicine medicine = medicineMapper.getMedicine(useMedicineReq);
+        Medicine medicine = medicineMapper.getPlayerMedicine(useMedicineReq);
         Fight fight = fightMap.getFightConcurrentHashMap().get(useMedicineReq.getPlayerId());
         StringBuilder sb = new StringBuilder();
 
@@ -102,7 +102,8 @@ public class FightServiceImpl implements FightService {
             return Result.error("药品不足");
         }
         //使用药品
-        medicineMapper.useMedicine(useMedicineReq);
+        medicine.setNumber(medicine.getNumber()-1);
+        medicineMapper.updateMedicine(medicine, useMedicineReq.getPlayerId());
 
         if(medicine.getRestoreHp()>0){
             fight.setCurPlayerHp(fight.getCurPlayerHp()+medicine.getRestoreHp());
